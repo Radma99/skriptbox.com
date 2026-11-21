@@ -1,0 +1,75 @@
+{% extends 'layout/tool.html.twig' %}
+{% import 'macros/_form.html.twig' as form %}
+
+{% set tool_key = 'th' %}
+{% set tool_entry = 'table-to-html' %}
+
+{% block tool %}
+    <div data-table-to-html data-i18n="{{ {
+        copied: 'tool.copied'|trans,
+        empty: 'th.output.empty'|trans,
+        info: 'th.output.info'|trans,
+        example: 'th.example'|trans,
+        fullscreenPreview: 'th.preview.title'|trans,
+        fullscreenCode: 'th.output.title'|trans,
+        close: 'tool.close'|trans,
+        copy: 'tool.copy'|trans,
+    }|json_encode|e('html_attr') }}">
+        <form data-th-form novalidate>
+            <div class="d-flex justify-content-between align-items-end mb-2">
+                <label class="form-label mb-0" for="th-input">{{ 'th.field.input'|trans }}</label>
+                <button type="button" class="btn btn-sm btn-link" data-th-action="example">{{ 'th.action.example'|trans }}</button>
+            </div>
+            <textarea class="form-control th-input" id="th-input" name="input" rows="8" spellcheck="false"
+                      placeholder="{{ 'th.field.placeholder'|trans }}"></textarea>
+            <p class="form-text">{{ 'th.field.input_hint'|trans }}</p>
+
+            <div class="row g-3 mt-1">
+                {{ form.select('delimiter', 'th.field.delimiter'|trans, {
+                    auto: 'th.delimiter.auto'|trans,
+                    tab: 'th.delimiter.tab'|trans,
+                    ';': 'th.delimiter.semicolon'|trans,
+                    ',': 'th.delimiter.comma'|trans,
+                    '|': 'th.delimiter.pipe'|trans,
+                }, {id: 'th-delimiter', selected: 'auto', wrapper_class: 'col-6 col-lg-3'}) }}
+
+                {{ form.select('format', 'th.field.format'|trans, {
+                    html: 'HTML',
+                    markdown: 'Markdown',
+                    csv: 'CSV (;)',
+                }, {id: 'th-format', selected: 'html', wrapper_class: 'col-6 col-lg-3'}) }}
+
+                {{ form.input('caption', 'th.field.caption'|trans, {id: 'th-caption', placeholder: 'th.field.caption_placeholder'|trans, wrapper_class: 'col-6 col-lg-3'}) }}
+                {{ form.input('className', 'th.field.class'|trans, {id: 'th-class', placeholder: 'table table-striped', wrapper_class: 'col-6 col-lg-3'}) }}
+
+                <div class="col-12 d-flex flex-wrap gap-4">
+                    {{ form.switch('headerRow', 'th.field.header_row'|trans, {id: 'th-header-row', checked: true, wrapper_class: ''}) }}
+                    {{ form.switch('headerColumn', 'th.field.header_column'|trans, {id: 'th-header-column', wrapper_class: ''}) }}
+                    {{ form.switch('alignNumbers', 'th.field.align_numbers'|trans, {id: 'th-align', checked: true, wrapper_class: ''}) }}
+                </div>
+            </div>
+        </form>
+
+        <hr class="my-4">
+
+        <div class="row g-4">
+            <div class="col-xl-6">
+                <div class="d-flex justify-content-between align-items-end mb-2">
+                    <p class="form-label mb-0">{{ 'th.preview.title'|trans }} <span class="text-body-secondary fw-normal small" data-th-info></span></p>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-th-fullscreen="preview">{{ 'tool.fullscreen'|trans }}</button>
+                </div>
+                <div class="th-preview" data-th-preview data-empty="{{ 'th.preview.empty'|trans }}"></div>
+            </div>
+            <div class="col-xl-6">
+                <div class="d-flex justify-content-between align-items-end mb-2">
+                    <p class="form-label mb-0">{{ 'th.output.title'|trans }}</p>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-th-fullscreen="code">{{ 'tool.fullscreen'|trans }}</button>
+                        <button type="button" class="btn btn-sm btn-primary" data-th-action="copy">{{ 'tool.copy'|trans }}</button>
+                    </div>
+                </div>
+                <pre class="th-output" data-th-output tabindex="0"></pre>
+            </div>
+        </div>
+    </div>
+{% endblock %}
