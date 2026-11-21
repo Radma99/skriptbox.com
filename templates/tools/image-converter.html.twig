@@ -1,0 +1,63 @@
+{% extends 'layout/tool.html.twig' %}
+{% import 'macros/_form.html.twig' as form %}
+
+{% set tool_key = 'ic' %}
+{% set tool_entry = 'image-converter' %}
+
+{% block tool %}
+    <div data-image-converter data-i18n="{{ {
+        processing: 'ic.status.processing'|trans,
+        readError: 'ic.error.read'|trans,
+        unsupportedFormat: 'ic.error.unsupported_format'|trans,
+        download: 'ic.action.download'|trans,
+        remove: 'ic.action.remove'|trans,
+        summary: 'ic.summary'|trans,
+        summaryOne: 'ic.summary_one'|trans,
+        smaller: 'ic.change.smaller'|trans,
+        larger: 'ic.change.larger'|trans,
+    }|json_encode|e('html_attr') }}">
+        <div class="row g-4 g-lg-5">
+            <div class="col-lg-7">
+                <label class="dropzone" data-ic-dropzone>
+                    <svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true"><path d="M4 16.5V19a1 1 0 001 1h14a1 1 0 001-1v-2.5M12 15V4m0 0L7.5 8.5M12 4l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="dropzone__title">{{ 'ic.dropzone.title'|trans }}</span>
+                    <span>{{ 'ic.dropzone.hint'|trans }}</span>
+                    <input class="visually-hidden" type="file" accept="image/*" multiple data-ic-input>
+                </label>
+            </div>
+
+            <div class="col-lg-5">
+                <form data-ic-form novalidate>
+                    {{ form.select('format', 'ic.field.format'|trans, {
+                        'image/webp': 'WebP – ' ~ 'ic.format.webp_hint'|trans,
+                        'image/jpeg': 'JPG',
+                        'image/png': 'PNG',
+                        original: 'ic.format.original'|trans,
+                    }, {id: 'ic-format', selected: 'image/webp'}) }}
+
+                    <label class="form-label" for="ic-quality">{{ 'ic.field.quality'|trans }}</label>
+                    <div class="tool-range mb-3">
+                        <input class="form-range" id="ic-quality" name="quality" type="range" min="10" max="100" step="5" value="80">
+                        <output for="ic-quality" data-range-value="quality">80 %</output>
+                    </div>
+
+                    <div class="row g-3">
+                        {{ form.input('maxWidth', 'ic.field.max_width'|trans, {id: 'ic-max-width', type: 'number', inputmode: 'numeric', placeholder: 'ic.field.unchanged'|trans, wrapper_class: 'col-6'}) }}
+                        {{ form.input('maxHeight', 'ic.field.max_height'|trans, {id: 'ic-max-height', type: 'number', inputmode: 'numeric', placeholder: 'ic.field.unchanged'|trans, wrapper_class: 'col-6'}) }}
+                    </div>
+                    <p class="form-text">{{ 'ic.field.size_hint'|trans }}</p>
+                </form>
+            </div>
+        </div>
+
+        <div class="ic-toolbar" data-ic-toolbar hidden>
+            <p class="ic-toolbar__summary" data-ic-summary aria-live="polite"></p>
+            <div class="ic-toolbar__actions">
+                <button type="button" class="btn btn-primary" data-ic-action="download-all">{{ 'ic.action.download_all'|trans }}</button>
+                <button type="button" class="btn btn-outline-secondary" data-ic-action="clear">{{ 'ic.action.clear'|trans }}</button>
+            </div>
+        </div>
+
+        <ul class="ic-list" data-ic-list></ul>
+    </div>
+{% endblock %}

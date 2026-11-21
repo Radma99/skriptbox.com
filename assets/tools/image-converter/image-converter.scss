@@ -1,0 +1,88 @@
+.ic-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    margin: 1.5rem 0 1rem;
+
+    &__summary {
+        margin: 0;
+        color: var(--sb-muted);
+        font-size: .9375rem;
+    }
+
+    &__actions {
+        display: flex;
+        gap: .5rem;
+    }
+}
+
+.ic-list {
+    display: grid;
+    gap: .75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ic-item {
+    display: grid;
+    grid-template-columns: 4rem 1fr;
+    align-items: center;
+    gap: 1rem;
+    padding: .75rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    background: var(--sb-surface);
+
+    @media (min-width: 768px) {
+        grid-template-columns: 4rem 1fr auto;
+    }
+
+    &__preview {
+        display: grid;
+        place-items: center;
+        width: 4rem;
+        height: 4rem;
+        border-radius: calc(var(--bs-border-radius) - .125rem);
+        // Schachbrett, damit transparente Bereiche sichtbar sind
+        background: repeating-conic-gradient(var(--bs-secondary-bg) 0 25%, #fff 0 50%) 50% / 1rem 1rem;
+        overflow: hidden;
+
+        img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+    }
+
+    &__info {
+        min-width: 0;
+    }
+
+    &__name {
+        margin: 0;
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__details {
+        margin: .15rem 0 0;
+        color: var(--sb-muted);
+        font-size: .875rem;
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__actions {
+        display: flex;
+        gap: .5rem;
+        grid-column: 1 / -1;
+
+        @media (min-width: 768px) {
+            grid-column: auto;
+        }
+    }
+}
