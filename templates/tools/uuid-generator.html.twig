@@ -1,0 +1,138 @@
+{% extends 'layout/tool.html.twig' %}
+{% import 'macros/_form.html.twig' as form %}
+
+{% set tool_key = 'uid' %}
+{% set tool_entry = 'uuid-generator' %}
+
+{% set types = ['v4', 'v7', 'ulid', 'v5', 'nil', 'max'] %}
+
+{% block tool %}
+    {# Die IDs selbst entstehen erst im Browser: Die Seite wird gecacht und darf keine fertigen Werte enthalten #}
+    {% set i18n = {
+        copied: 'tool.copied'|trans,
+        empty: 'uid.output.empty'|trans,
+        generated: 'uid.output.generated'|trans,
+        error_namespace: 'uid.error.namespace'|trans,
+        error_crypto: 'uid.error.crypto'|trans,
+        valid_uuid: 'uid.check.valid_uuid'|trans,
+        valid_ulid: 'uid.check.valid_ulid'|trans,
+        invalid: 'uid.check.invalid'|trans,
+        fact_canonical: 'uid.fact.canonical'|trans,
+        fact_as_uuid: 'uid.fact.as_uuid'|trans,
+        fact_version: 'uid.fact.version'|trans,
+        fact_variant: 'uid.fact.variant'|trans,
+        fact_utc: 'uid.fact.utc'|trans,
+        fact_local: 'uid.fact.local'|trans,
+        fact_node: 'uid.fact.node'|trans,
+        fact_note: 'uid.fact.note'|trans,
+        version_unknown: 'uid.version.unknown'|trans,
+        special_nil: 'uid.type.nil'|trans,
+        special_max: 'uid.type.max'|trans,
+    } %}
+    {% for type in types %}
+        {% set i18n = i18n|merge({('hint_' ~ type): ('uid.hint.' ~ type)|trans}) %}
+    {% endfor %}
+    {% for version in 1..8 %}
+        {% set i18n = i18n|merge({('version_' ~ version): ('uid.version.' ~ version)|trans}) %}
+    {% endfor %}
+    {% for variant in ['rfc', 'ncs', 'microsoft', 'future'] %}
+        {% set i18n = i18n|merge({('variant_' ~ variant): ('uid.variant.' ~ variant)|trans}) %}
+    {% endfor %}
+    {% for note in ['v1', 'v3', 'v4', 'v5', 'v6', 'v7', 'v8', 'ulid', 'nil', 'max', 'variant'] %}
+        {% set i18n = i18n|merge({('note_' ~ note): ('uid.note.' ~ note)|trans}) %}
+    {% endfor %}
+
+    <div data-uuid-generator data-i18n="{{ i18n|json_encode|e('html_attr') }}">
+        <div class="tool-tabs" role="tablist" aria-label="{{ 'uid.mode.label'|trans }}">
+            <button type="button" class="tool-tabs__item active" role="tab" aria-selected="true" aria-controls="uid-panel-generate" data-uid-mode="generate">{{ 'uid.mode.generate'|trans }}</button>
+            <button type="button" class="tool-tabs__item" role="tab" aria-selected="false" aria-controls="uid-panel-check" data-uid-mode="check">{{ 'uid.mode.check'|trans }}</button>
+        </div>
+
+        <div id="uid-panel-generate" role="tabpanel" data-uid-panel="generate">
+            <form class="row g-4" data-uid-form novalidate>
+                <div class="col-lg-6">
+                    <div class="mb-3">
+                        <label class="form-label" for="uid-type">{{ 'uid.field.type'|trans }}</label>
+                        <select class="form-select" id="uid-type" name="type" aria-describedby="uid-hint">
+                            {% for type in types %}
+                                <option value="{{ type }}">{{ ('uid.type.' ~ type)|trans }}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="form-text mb-0" id="uid-hint" data-uid-hint>{{ 'uid.hint.v4'|trans }}</p>
+                    </div>
+
+                    <div class="mb-3" data-uid-show="v4 v7 ulid">
+                        <label class="form-label" for="uid-count">{{ 'uid.field.count'|trans }}</label>
+                        <input class="form-control uid-count" id="uid-count" name="count" type="number" min="1" max="1000" step="1" value="10" inputmode="numeric">
+                    </div>
+
+                    <div data-uid-show="v5" hidden>
+                        {{ form.select('namespace', 'uid.field.namespace'|trans, {
+                            dns: 'uid.namespace.dns'|trans,
+                            url: 'uid.namespace.url'|trans,
+                            oid: 'uid.namespace.oid'|trans,
+                            x500: 'uid.namespace.x500'|trans,
+                            custom: 'uid.namespace.custom'|trans,
+                        }, {id: 'uid-namespace', selected: 'dns'}) }}
+                        <div data-uid-custom hidden>
+                            {{ form.input('custom', 'uid.field.custom'|trans, {id: 'uid-custom', placeholder: '6ba7b810-9dad-11d1-80b4-00c04fd430c8', autocomplete: 'off'}) }}
+                        </div>
+                        <label class="form-label" for="uid-names">{{ 'uid.field.names'|trans }}</label>
+                        <textarea class="form-control uid-names" id="uid-names" name="names" rows="3" spellcheck="false"
+                                  autocomplete="off" autocapitalize="off" placeholder="example.com" aria-describedby="uid-names-help"></textarea>
+                        <p class="form-text" id="uid-names-help">{{ 'uid.field.names_help'|trans }}</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    {{ form.select('format', 'uid.field.format'|trans, {
+                        list: 'uid.format.list'|trans,
+                        json: 'uid.format.json'|trans,
+                        sql: 'uid.format.sql'|trans,
+                        csv: 'uid.format.csv'|trans,
+                    }, {id: 'uid-format', selected: 'list'}) }}
+
+                    <div data-uid-show="v4 v7 v5 nil max">
+                        {{ form.switch('uppercase', 'uid.field.uppercase'|trans, {id: 'uid-uppercase', wrapper_class: 'mb-2'}) }}
+                        {{ form.switch('noHyphens', 'uid.field.no_hyphens'|trans, {id: 'uid-no-hyphens', wrapper_class: 'mb-2'}) }}
+                        {{ form.switch('braces', 'uid.field.braces'|trans, {id: 'uid-braces', wrapper_class: 'mb-2'}) }}
+                    </div>
+                    <p class="form-text" data-uid-show="ulid" hidden>{{ 'uid.field.ulid_format'|trans }}</p>
+                </div>
+            </form>
+
+            <hr class="my-4">
+
+            <div class="uid-actions">
+                <div>
+                    <p class="form-label mb-0">{{ 'uid.output.title'|trans }}</p>
+                    <p class="uid-status" data-uid-status aria-live="polite"></p>
+                </div>
+                <div class="uid-actions__buttons">
+                    <button type="button" class="btn btn-outline-secondary" data-uid-action="generate" aria-label="{{ 'uid.action.generate'|trans }}" title="{{ 'uid.action.generate'|trans }}">
+                        <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 11-1.6-3.9M13.5 2.5v3h-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-uid-action="download">{{ 'uid.action.download'|trans }}</button>
+                    <button type="button" class="btn btn-primary" data-uid-action="copy">{{ 'tool.copy'|trans }}</button>
+                </div>
+            </div>
+
+            <p class="alert alert-warning" data-uid-error hidden></p>
+            <pre class="uid-output" data-uid-output tabindex="0" aria-label="{{ 'uid.output.title'|trans }}"></pre>
+        </div>
+
+        <div id="uid-panel-check" role="tabpanel" data-uid-panel="check" hidden>
+            <form data-uid-check novalidate>
+                <label class="form-label" for="uid-check">{{ 'uid.check.input'|trans }}</label>
+                <input class="form-control uid-check-input" id="uid-check" name="id" type="text" spellcheck="false"
+                       autocomplete="off" autocapitalize="off" placeholder="018f3c1e-7b2a-7c41-9d6e-2b8a5f4c3d21" aria-describedby="uid-check-help">
+                <p class="form-text" id="uid-check-help">{{ 'uid.check.help'|trans }}</p>
+            </form>
+
+            <div aria-live="polite">
+                <p class="uid-verdict" data-uid-check-status hidden></p>
+                <dl class="uid-facts" data-uid-facts hidden></dl>
+            </div>
+        </div>
+    </div>
+{% endblock %}
