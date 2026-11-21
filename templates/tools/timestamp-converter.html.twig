@@ -1,0 +1,164 @@
+{% extends 'layout/tool.html.twig' %}
+{% import 'macros/_form.html.twig' as form %}
+
+{% set tool_key = 'ts' %}
+{% set tool_entry = 'timestamp-converter' %}
+
+{% set units = ['s', 'ms', 'us', 'ns'] %}
+{% set labels = ['iso', 'rfc3339', 'rfc2822', 'readable', 'weekday', 'week', 'day_of_year'] %}
+
+{# Die Seite wird gecacht: Uhrzeiten, Zeitzonen und Startwerte setzt ausschließlich das Skript #}
+{% block tool %}
+    {% set i18n = {
+        copy: 'tool.copy'|trans,
+        copied: 'tool.copied'|trans,
+        pause: 'ts.now.pause'|trans,
+        resume: 'ts.now.resume'|trans,
+        auto: 'ts.unit.auto'|trans,
+        auto_detected: 'ts.unit.auto_detected'|trans,
+        detected: 'ts.detected'|trans,
+        zone_utc: 'ts.zone.utc'|trans,
+        zone_local: 'ts.zone.local'|trans,
+        formats: 'ts.output.formats'|trans,
+        week_value: 'ts.output.week_value'|trans,
+        day_of_year_value: 'ts.output.day_of_year_value'|trans,
+        empty: 'ts.output.empty'|trans,
+        empty_date: 'ts.output.empty_date'|trans,
+        empty_list: 'ts.output.empty_list'|trans,
+        error_invalid: 'ts.error.invalid'|trans,
+        error_range: 'ts.error.range'|trans,
+        error_date: 'ts.error.date'|trans,
+        list_invalid: 'ts.error.list_invalid'|trans,
+        hint_y2038: 'ts.hint.y2038'|trans,
+        hint_negative: 'ts.hint.negative'|trans,
+        hint_gap: 'ts.hint.gap'|trans,
+        hint_ambiguous: 'ts.hint.ambiguous'|trans,
+        code_now: 'ts.code.now'|trans,
+        code_now_ms: 'ts.code.now_ms'|trans,
+        code_to_date: 'ts.code.to_date'|trans,
+        code_to_timestamp: 'ts.code.to_timestamp'|trans,
+    } %}
+    {% for key in units %}
+        {% set i18n = i18n|merge({('unit_' ~ key): ('ts.unit.' ~ key)|trans}) %}
+    {% endfor %}
+    {% for key in labels %}
+        {% set i18n = i18n|merge({('label_' ~ key): ('ts.output.' ~ key)|trans}) %}
+    {% endfor %}
+
+    <div data-timestamp-converter data-i18n="{{ i18n|json_encode|e('html_attr') }}">
+        <div class="ts-now">
+            <p class="form-label" id="ts-now-label">{{ 'ts.now.title'|trans }}</p>
+            {# Bewusst ohne aria-live: Eine sekündliche Ansage wäre für Screenreader unbenutzbar #}
+            <div class="tool-output mb-1">
+                <div class="tool-output__value ts-now__value" data-ts-clock aria-labelledby="ts-now-label">&nbsp;</div>
+                <button type="button" class="btn btn-primary" data-ts-action="copy-now">{{ 'tool.copy'|trans }}</button>
+                <button type="button" class="btn btn-outline-secondary" data-ts-action="pause" aria-pressed="false">{{ 'ts.now.pause'|trans }}</button>
+                <button type="button" class="btn btn-outline-secondary" data-ts-action="use-now">{{ 'ts.now.use'|trans }}</button>
+            </div>
+            <p class="form-text mt-0">
+                {{ 'ts.unit.ms'|trans }}: <span class="ts-now__ms" data-ts-clock-ms></span>
+                <button type="button" class="btn btn-link btn-sm p-0 align-baseline" data-ts-action="copy-now-ms">{{ 'ts.now.copy_ms'|trans }}</button>
+            </p>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="tool-tabs" role="tablist" aria-label="{{ 'ts.mode.label'|trans }}">
+            <button type="button" class="tool-tabs__item active" role="tab" aria-selected="true" aria-controls="ts-panel-date" data-ts-mode="date">{{ 'ts.mode.to_date'|trans }}</button>
+            <button type="button" class="tool-tabs__item" role="tab" aria-selected="false" aria-controls="ts-panel-timestamp" data-ts-mode="timestamp">{{ 'ts.mode.to_timestamp'|trans }}</button>
+            <button type="button" class="tool-tabs__item" role="tab" aria-selected="false" aria-controls="ts-panel-list" data-ts-mode="list">{{ 'ts.mode.list'|trans }}</button>
+        </div>
+
+        <div id="ts-panel-date" role="tabpanel" data-ts-panel="date">
+            <form class="row g-3" data-ts-form="date" novalidate>
+                <div class="col-md-4">
+                    <label class="form-label" for="ts-timestamp">{{ 'ts.field.timestamp'|trans }}</label>
+                    <input class="form-control ts-mono" id="ts-timestamp" name="timestamp" type="text" inputmode="text"
+                           autocomplete="off" spellcheck="false" placeholder="1700000000" aria-describedby="ts-detected">
+                </div>
+                <div class="col-sm-6 col-md-4">
+                    <label class="form-label" for="ts-unit">{{ 'ts.field.unit'|trans }}</label>
+                    <select class="form-select" id="ts-unit" name="unit" data-ts-unit>
+                        <option value="auto" data-ts-auto>{{ 'ts.unit.auto'|trans }}</option>
+                        {% for key in units %}
+                            <option value="{{ key }}">{{ ('ts.unit.' ~ key)|trans }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-sm-6 col-md-4">
+                    <label class="form-label" for="ts-zone">{{ 'ts.field.zone'|trans }}</label>
+                    <select class="form-select" id="ts-zone" name="zone" data-ts-zone></select>
+                </div>
+            </form>
+            <p class="form-text" id="ts-detected" data-ts-detected></p>
+
+            <hr class="my-4">
+
+            <ul class="ts-hints" data-ts-hints="date" hidden aria-live="polite"></ul>
+            <p class="ts-empty" data-ts-empty="date" aria-live="polite"></p>
+
+            <div data-ts-result="date" hidden>
+                <dl class="ts-zones" data-ts-zones aria-live="polite"></dl>
+                <p class="ts-relative" data-ts-relative></p>
+
+                <p class="form-label" data-ts-formats-title></p>
+                <dl class="ts-formats" data-ts-formats="date"></dl>
+            </div>
+        </div>
+
+        <div id="ts-panel-timestamp" role="tabpanel" data-ts-panel="timestamp" hidden>
+            <form class="row g-3" data-ts-form="timestamp" novalidate>
+                <div class="col-md-5">
+                    <label class="form-label" for="ts-datetime">{{ 'ts.field.datetime'|trans }}</label>
+                    <input class="form-control" id="ts-datetime" name="datetime" type="datetime-local" step="1">
+                </div>
+                <div class="col-sm-8 col-md-4">
+                    <label class="form-label" for="ts-zone-timestamp">{{ 'ts.field.zone'|trans }}</label>
+                    <select class="form-select" id="ts-zone-timestamp" name="zone" data-ts-zone></select>
+                </div>
+                <div class="col-sm-4 col-md-3 d-flex align-items-end">
+                    <button type="button" class="btn btn-outline-secondary w-100" data-ts-action="now">{{ 'ts.field.now'|trans }}</button>
+                </div>
+            </form>
+
+            <hr class="my-4">
+
+            <ul class="ts-hints" data-ts-hints="timestamp" hidden aria-live="polite"></ul>
+            <p class="ts-empty" data-ts-empty="timestamp" aria-live="polite"></p>
+
+            <div data-ts-result="timestamp" hidden>
+                <p class="form-label">{{ 'ts.output.title'|trans }}</p>
+                <dl class="ts-formats" data-ts-formats="timestamp" aria-live="polite"></dl>
+            </div>
+        </div>
+
+        <div id="ts-panel-list" role="tabpanel" data-ts-panel="list" hidden>
+            <form class="row g-3" data-ts-form="list" novalidate>
+                <div class="col-md-8">
+                    <label class="form-label" for="ts-list">{{ 'ts.field.list'|trans }}</label>
+                    <textarea class="form-control ts-mono ts-list" id="ts-list" name="list" rows="5" spellcheck="false"
+                              autocomplete="off" autocapitalize="off" placeholder="1700000000&#10;1700000000123&#10;-86400"></textarea>
+                    <p class="form-text">{{ 'ts.field.list_hint'|trans }}</p>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="ts-zone-list">{{ 'ts.field.zone'|trans }}</label>
+                    <select class="form-select" id="ts-zone-list" name="zone" data-ts-zone></select>
+                </div>
+            </form>
+
+            <hr class="my-4">
+
+            <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                <p class="form-label mb-0">{{ 'ts.output.title'|trans }}</p>
+                <button type="button" class="btn btn-primary" data-ts-action="copy-list">{{ 'tool.copy'|trans }}</button>
+            </div>
+            <pre class="ts-output" data-ts-list-output tabindex="0" aria-live="polite"></pre>
+        </div>
+
+        <section class="ts-code-section" data-ts-code-section aria-labelledby="ts-code-title">
+            <h2 class="ts-code-section__title" id="ts-code-title">{{ 'ts.code.title'|trans }}</h2>
+            <div class="tool-tabs ts-code-tabs" role="tablist" aria-label="{{ 'ts.code.label'|trans }}" data-ts-languages></div>
+            <dl class="ts-code" id="ts-code" role="tabpanel" data-ts-code></dl>
+        </section>
+    </div>
+{% endblock %}
