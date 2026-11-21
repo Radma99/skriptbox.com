@@ -1,0 +1,136 @@
+{% extends 'layout/tool.html.twig' %}
+
+{% set tool_key = 'cc' %}
+{% set tool_entry = 'contrast-checker' %}
+
+{% set criteria = [
+    {id: 'normal_aa', level: 'AA', sc: '1.4.3', min: '4.5'},
+    {id: 'normal_aaa', level: 'AAA', sc: '1.4.6', min: '7'},
+    {id: 'large_aa', level: 'AA', sc: '1.4.3', min: '3'},
+    {id: 'large_aaa', level: 'AAA', sc: '1.4.6', min: '4.5'},
+    {id: 'ui', level: 'AA', sc: '1.4.11', min: '3'},
+] %}
+
+{% block tool %}
+    {% set i18n = {
+        copied: 'tool.copied'|trans,
+        pass: 'cc.result.pass'|trans,
+        fail: 'cc.result.fail'|trans,
+        summary: 'cc.result.summary'|trans,
+        min: 'cc.result.min'|trans,
+        alpha_fg: 'cc.alpha.fg'|trans,
+        alpha_bg: 'cc.alpha.bg'|trans,
+        met: 'cc.suggest.met'|trans,
+        unreachable: 'cc.suggest.unreachable'|trans,
+        apply_label: 'cc.action.apply_label'|trans,
+        target_fg: 'cc.suggest.target_fg'|trans,
+        target_bg: 'cc.suggest.target_bg'|trans,
+    } %}
+
+    <div data-contrast-checker data-i18n="{{ i18n|json_encode|e('html_attr') }}">
+        <form class="cc-colors" data-cc-form novalidate>
+            {% for key, value in {fg: '#1f5fae', bg: '#ffffff'} %}
+                {% set label = ('cc.field.' ~ key)|trans %}
+                <div class="cc-colors__field">
+                    <label class="form-label" for="cc-{{ key }}">{{ label }}</label>
+                    <div class="cc-color">
+                        <input class="form-control form-control-color" type="color" value="{{ value }}" data-cc-picker="{{ key }}"
+                               aria-label="{{ 'cc.field.picker'|trans({'%label%': label}) }}">
+                        <input class="form-control cc-color__text" id="cc-{{ key }}" name="{{ key }}" type="text" value="{{ value }}"
+                               data-cc-input="{{ key }}" spellcheck="false" autocomplete="off" autocapitalize="off"
+                               aria-describedby="cc-{{ key }}-error cc-format">
+                    </div>
+                    <p class="cc-color__error" id="cc-{{ key }}-error" data-cc-error="{{ key }}" hidden>{{ 'cc.field.invalid'|trans }}</p>
+                </div>
+                {% if key == 'fg' %}
+                    <button type="button" class="btn btn-outline-secondary cc-colors__swap" data-cc-action="swap"
+                            title="{{ 'cc.action.swap'|trans }}">
+                        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 8h15M15 4l4 4-4 4M20 16H5M9 12l-4 4 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span>{{ 'cc.action.swap'|trans }}</span>
+                    </button>
+                {% endif %}
+            {% endfor %}
+        </form>
+        <p class="form-text mt-2 mb-0" id="cc-format">{{ 'cc.field.format'|trans }}</p>
+
+        <ul class="cc-hints" data-cc-hints hidden></ul>
+
+        <hr class="my-4">
+
+        <div class="cc-result">
+            <div class="cc-score">
+                <p class="form-label mb-1">{{ 'cc.result.ratio'|trans }}</p>
+                <p class="cc-score__value" data-cc-ratio></p>
+                <p class="cc-score__note">{{ 'cc.result.truncated'|trans }}</p>
+                <p class="visually-hidden" aria-live="polite" data-cc-summary></p>
+            </div>
+
+            <ul class="cc-checks">
+                {% for criterion in criteria %}
+                    <li class="cc-check" data-cc-check="{{ criterion.id }}" data-cc-min="{{ criterion.min }}">
+                        <span class="cc-check__name">
+                            <strong>{{ ('cc.check.' ~ criterion.id)|trans }} · {{ criterion.level }}</strong>
+                            <small>WCAG {{ criterion.sc }} · <span data-cc-check-min></span></small>
+                        </span>
+                        <span class="cc-status" data-cc-status></span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <p class="form-text">{{ 'cc.check.large_hint'|trans }}</p>
+
+        <div class="cc-apca">
+            <p class="mb-1">
+                <strong>{{ 'cc.apca.title'|trans }}:</strong>
+                <span class="cc-apca__value" data-cc-apca></span>
+                <span class="badge text-bg-warning">{{ 'cc.apca.badge'|trans }}</span>
+            </p>
+            <p class="form-text mb-0">{{ 'cc.apca.text'|trans }}</p>
+        </div>
+
+        <hr class="my-4">
+
+        <p class="form-label">{{ 'cc.preview.title'|trans }}</p>
+        <div class="cc-preview" data-cc-preview>
+            <p class="cc-preview__normal">{{ 'cc.preview.normal'|trans }}</p>
+            <p class="cc-preview__large">{{ 'cc.preview.large'|trans }}</p>
+            <div class="cc-preview__row">
+                <span class="cc-preview__button" data-cc-preview-button>{{ 'cc.preview.button'|trans }}</span>
+                <span class="cc-preview__outline">{{ 'cc.preview.outline'|trans }}</span>
+                <span class="cc-preview__link">{{ 'cc.preview.link'|trans }}</span>
+                <span class="cc-preview__icon">
+                    <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.5 6.6 19.5l1.2-6-4.5-4.2 6.1-.7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                    {{ 'cc.preview.icon'|trans }}
+                </span>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <p class="form-label mb-1">{{ 'cc.suggest.title'|trans }}</p>
+        <p class="form-text mt-0">{{ 'cc.suggest.intro'|trans }}</p>
+        <div class="cc-suggestions">
+            {% for target in ['fg', 'bg'] %}
+                <div>
+                    <p class="cc-suggestions__title">{{ ('cc.suggest.' ~ target)|trans }}</p>
+                    {% for level in ['aa', 'aaa'] %}
+                        <div class="cc-suggestion" data-cc-suggestion="{{ target }}" data-cc-level="{{ level == 'aa' ? '4.5' : '7' }}">
+                            <span class="cc-suggestion__swatch" data-cc-swatch aria-hidden="true">Aa</span>
+                            <span class="cc-suggestion__body">
+                                <strong>{{ ('cc.suggest.' ~ level)|trans }}</strong>
+                                <span data-cc-suggestion-text></span>
+                            </span>
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-cc-apply>{{ 'cc.action.apply'|trans }}</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <hr class="my-4">
+
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <button type="button" class="btn btn-primary" data-cc-action="share">{{ 'cc.action.share'|trans }}</button>
+        </div>
+    </div>
+{% endblock %}
