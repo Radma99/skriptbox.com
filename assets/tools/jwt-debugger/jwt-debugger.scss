@@ -1,0 +1,292 @@
+// Farben der drei Token-Teile, wie in gängigen JWT-Debuggern
+$jwt-header: #d1462f;
+$jwt-payload: #7a3fd1;
+$jwt-signature: #12846b;
+
+.jwt-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    margin-bottom: 1.25rem;
+
+    .tool-tabs {
+        margin-bottom: 0;
+    }
+
+    &__example {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+}
+
+// Eingabefeld mit eingefärbtem Text: Die Hervorhebung liegt exakt unter einer transparenten Textarea
+.jwt-editor {
+    position: relative;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    background: var(--sb-surface);
+
+    &:focus-within {
+        border-color: var(--sb-brand);
+        box-shadow: 0 0 0 .2rem rgb(31 95 174 / 20%);
+    }
+
+    &__highlight,
+    &__input {
+        margin: 0;
+        padding: .875rem 1rem;
+        font-family: var(--bs-font-monospace);
+        font-size: .875rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        word-break: break-all;
+        overflow-wrap: anywhere;
+    }
+
+    &__highlight {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    &__input {
+        position: relative;
+        display: block;
+        width: 100%;
+        min-height: 18rem;
+        border: 0;
+        background: transparent;
+        color: transparent;
+        caret-color: var(--bs-body-color);
+        resize: vertical;
+        outline: none;
+
+        &::placeholder {
+            color: var(--sb-muted);
+        }
+
+        &::selection {
+            background: rgb(31 95 174 / 25%);
+            color: transparent;
+        }
+    }
+}
+
+.jwt-part {
+    &--header {
+        color: $jwt-header;
+    }
+
+    &--payload {
+        color: $jwt-payload;
+    }
+
+    &--signature {
+        color: $jwt-signature;
+    }
+
+    &--extra {
+        color: var(--bs-danger);
+        text-decoration: underline wavy;
+    }
+}
+
+.jwt-dot {
+    color: var(--bs-body-color);
+    font-weight: 700;
+}
+
+.jwt-status {
+    margin: .75rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: .875rem;
+
+    &__item {
+        display: flex;
+        gap: .4rem;
+
+        &::before {
+            font-weight: 700;
+        }
+
+        &.is-ok {
+            color: var(--bs-success);
+
+            &::before {
+                content: '✓';
+            }
+        }
+
+        &.is-warning {
+            color: var(--bs-warning-text-emphasis);
+
+            &::before {
+                content: '!';
+            }
+        }
+
+        &.is-error {
+            color: var(--bs-danger);
+
+            &::before {
+                content: '✕';
+            }
+        }
+    }
+}
+
+.jwt-block {
+    margin-bottom: 1.25rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    overflow: hidden;
+
+    &__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .5rem;
+        padding: .4rem .5rem .4rem .75rem;
+        border-bottom: 1px solid var(--bs-border-color);
+        background: var(--bs-tertiary-bg);
+    }
+
+    &__views,
+    &__actions {
+        display: flex;
+        gap: .25rem;
+    }
+
+    &__body {
+        max-height: 26rem;
+        overflow: auto;
+    }
+}
+
+.jwt-view {
+    padding: .2rem .6rem;
+    border: 1px solid transparent;
+    border-radius: var(--bs-border-radius-sm);
+    background: none;
+    color: var(--sb-muted);
+    font-size: .8125rem;
+
+    &.active {
+        border-color: var(--bs-border-color);
+        background: var(--sb-surface);
+        color: var(--bs-body-color);
+        font-weight: 600;
+    }
+}
+
+.jwt-json {
+    margin: 0;
+    padding: .875rem 1rem;
+    font-family: var(--bs-font-monospace);
+    font-size: .8125rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.json-key {
+    color: #1d2733;
+    font-weight: 600;
+}
+
+.json-string {
+    color: #2b8a3e;
+}
+
+.json-number {
+    color: #1f5fae;
+}
+
+.json-literal {
+    color: #c2410c;
+}
+
+.jwt-claims {
+    margin: 0;
+    font-size: .875rem;
+
+    th {
+        width: 1%;
+        padding-left: 1rem;
+        white-space: nowrap;
+        vertical-align: top;
+    }
+
+    td {
+        overflow-wrap: anywhere;
+    }
+}
+
+.jwt-claim-description {
+    display: block;
+    color: var(--sb-muted);
+    font-size: .8125rem;
+}
+
+.jwt-empty {
+    margin: 0;
+    padding: 1rem;
+    color: var(--sb-muted);
+    font-size: .875rem;
+}
+
+.jwt-key-input {
+    font-family: var(--bs-font-monospace);
+    font-size: .8125rem;
+}
+
+.jwt-signature-result {
+    margin: .5rem 0 0;
+    padding: .5rem .75rem;
+    border-radius: var(--bs-border-radius);
+    font-size: .875rem;
+    font-weight: 600;
+
+    &:empty {
+        display: none;
+    }
+
+    &.is-ok {
+        background: var(--bs-success-bg-subtle);
+        color: var(--bs-success-text-emphasis);
+    }
+
+    &.is-error {
+        background: var(--bs-danger-bg-subtle);
+        color: var(--bs-danger-text-emphasis);
+    }
+
+    &.is-neutral {
+        background: var(--bs-tertiary-bg);
+        color: var(--sb-muted);
+        font-weight: 400;
+    }
+}
+
+.jwt-encoded {
+    min-height: 8rem;
+    margin: 0;
+    padding: .875rem 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    font-family: var(--bs-font-monospace);
+    font-size: .875rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.jwt-json-input {
+    font-family: var(--bs-font-monospace);
+    font-size: .8125rem;
+}

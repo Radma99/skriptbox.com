@@ -1,0 +1,170 @@
+{% extends 'layout/tool.html.twig' %}
+
+{% set tool_key = 'jwt' %}
+{% set tool_entry = 'jwt-debugger' %}
+
+{% set algorithms = ['HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'PS256', 'PS384', 'PS512', 'ES256', 'ES384', 'ES512', 'EdDSA'] %}
+{% set claim_keys = ['alg', 'typ', 'kid', 'cty', 'jku', 'x5u', 'x5t', 'iss', 'sub', 'aud', 'exp', 'nbf', 'iat', 'jti', 'azp', 'scope', 'scp', 'client_id', 'nonce', 'auth_time', 'sid', 'name', 'given_name', 'family_name', 'preferred_username', 'username', 'email', 'email_verified', 'roles', 'groups', 'authorities', 'token_type', 'acr', 'amr', 'at_hash', 'locale'] %}
+{% set error_keys = ['parts', 'jwe', 'header_base64', 'payload_base64', 'header_json', 'payload_json', 'signature_base64', 'alg_none', 'alg_unsupported', 'alg_browser', 'header_alg', 'key_missing', 'key_format', 'key_json', 'jwk_kid', 'key_private_for_verify', 'key_public_for_sign'] %}
+
+{% macro block(part, title) %}
+    <section class="jwt-block" aria-label="{{ title }}">
+        <div class="jwt-block__head">
+            <div class="jwt-block__views">
+                <button type="button" class="jwt-view active" data-jwt-view="{{ part }}:json">JSON</button>
+                <button type="button" class="jwt-view" data-jwt-view="{{ part }}:claims">{{ 'jwt.view.claims'|trans }}</button>
+            </div>
+            <span class="fw-semibold small">{{ title }}</span>
+            <div class="jwt-block__actions">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-jwt-copy="{{ part }}">{{ 'tool.copy'|trans }}</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-jwt-fullscreen="{{ part }}" title="{{ 'tool.fullscreen'|trans }}" aria-label="{{ 'tool.fullscreen'|trans }}">⤢</button>
+            </div>
+        </div>
+        <div class="jwt-block__body" data-jwt-output="{{ part }}"></div>
+    </section>
+{% endmacro %}
+
+{% block tool %}
+    {% set claims = {} %}
+    {% for key in claim_keys %}
+        {% set claims = claims|merge({(key): ('jwt.claim.' ~ key)|trans}) %}
+    {% endfor %}
+
+    {% set i18n = {
+        copied: 'tool.copied'|trans,
+        copy: 'tool.copy'|trans,
+        close: 'tool.close'|trans,
+        empty: 'jwt.empty'|trans,
+        title_header: 'jwt.decoder.header'|trans,
+        title_payload: 'jwt.decoder.payload'|trans,
+        valid_structure: 'jwt.status.valid_structure'|trans,
+        timing_expired: 'jwt.status.expired'|trans,
+        timing_not_yet_valid: 'jwt.status.not_yet_valid'|trans,
+        timing_issued_in_future: 'jwt.status.issued_in_future'|trans,
+        signature_valid: 'jwt.signature.valid'|trans,
+        signature_invalid: 'jwt.signature.invalid'|trans,
+        signature_enter_secret: 'jwt.signature.enter_secret'|trans,
+        signature_enter_key: 'jwt.signature.enter_key'|trans,
+        encoder_enter_private_key: 'jwt.encoder.enter_private_key'|trans,
+        encoder_signed: 'jwt.encoder.signed'|trans,
+        claims: claims,
+    } %}
+    {% for key in error_keys %}
+        {% set i18n = i18n|merge({('error_' ~ key): ('jwt.error.' ~ key)|trans}) %}
+    {% endfor %}
+
+    <div data-jwt-debugger data-i18n="{{ i18n|json_encode|e('html_attr') }}">
+        <div class="jwt-toolbar">
+            <div class="tool-tabs" role="tablist" aria-label="{{ 'jwt.mode.label'|trans }}">
+                <button type="button" class="tool-tabs__item active" role="tab" aria-selected="true" data-jwt-mode="decoder">{{ 'jwt.mode.decoder'|trans }}</button>
+                <button type="button" class="tool-tabs__item" role="tab" aria-selected="false" data-jwt-mode="encoder">{{ 'jwt.mode.encoder'|trans }}</button>
+            </div>
+            <div class="jwt-toolbar__example">
+                <label class="form-label mb-0 small fw-semibold" for="jwt-example-alg">{{ 'jwt.example.label'|trans }}</label>
+                <select class="form-select form-select-sm w-auto" id="jwt-example-alg" data-jwt-example-alg>
+                    {% for alg in algorithms %}<option value="{{ alg }}"{{ alg == 'RS256' ? ' selected' }}>{{ alg }}</option>{% endfor %}
+                </select>
+                <button type="button" class="btn btn-sm btn-outline-primary" data-jwt-action="example">{{ 'jwt.example.button'|trans }}</button>
+            </div>
+        </div>
+
+        {# Decoder #}
+        <div class="row g-4" data-jwt-panel="decoder" role="tabpanel">
+            <div class="col-xl-6">
+                <div class="d-flex justify-content-between align-items-end mb-2">
+                    <label class="form-label mb-0" for="jwt-input">{{ 'jwt.decoder.token'|trans }}</label>
+                    <div class="d-flex gap-1">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-jwt-copy="token">{{ 'tool.copy'|trans }}</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-jwt-action="clear">{{ 'jwt.decoder.clear'|trans }}</button>
+                    </div>
+                </div>
+                <div class="jwt-editor">
+                    <pre class="jwt-editor__highlight" data-jwt-highlight aria-hidden="true"></pre>
+                    <textarea class="jwt-editor__input" id="jwt-input" data-jwt-input spellcheck="false" autocomplete="off" autocapitalize="off"
+                              placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9…"></textarea>
+                </div>
+                <ul class="jwt-status" data-jwt-status aria-live="polite"></ul>
+                <p class="form-text">{{ 'jwt.decoder.hint'|trans }}</p>
+            </div>
+
+            <div class="col-xl-6">
+                {{ _self.block('header', 'jwt.decoder.header'|trans) }}
+                {{ _self.block('payload', 'jwt.decoder.payload'|trans) }}
+
+                <section class="jwt-block" aria-labelledby="jwt-signature-title">
+                    <div class="jwt-block__head">
+                        <span class="fw-semibold small" id="jwt-signature-title">{{ 'jwt.signature.title'|trans }}</span>
+                        <span class="small text-body-secondary">{{ 'jwt.signature.algorithm'|trans }}: <code data-jwt-alg>–</code></span>
+                    </div>
+                    <div class="p-3">
+                        <div data-jwt-secret-group hidden>
+                            <label class="form-label" for="jwt-secret">{{ 'jwt.signature.secret'|trans }}</label>
+                            <input class="form-control jwt-key-input" id="jwt-secret" type="text" data-jwt-secret autocomplete="off" spellcheck="false">
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" role="switch" id="jwt-secret-base64" data-jwt-secret-base64>
+                                <label class="form-check-label" for="jwt-secret-base64">{{ 'jwt.signature.secret_base64'|trans }}</label>
+                            </div>
+                        </div>
+                        <div data-jwt-key-group hidden>
+                            <label class="form-label" for="jwt-key">{{ 'jwt.signature.public_key'|trans }}</label>
+                            <textarea class="form-control jwt-key-input" id="jwt-key" rows="6" data-jwt-key spellcheck="false"
+                                      placeholder="-----BEGIN PUBLIC KEY-----&#10;…&#10;-----END PUBLIC KEY-----"></textarea>
+                            <p class="form-text">{{ 'jwt.signature.public_key_hint'|trans }}</p>
+                        </div>
+                        <p class="jwt-signature-result" data-jwt-signature-result aria-live="polite"></p>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        {# Encoder #}
+        <form class="row g-4" data-jwt-panel="encoder" data-jwt-encoder role="tabpanel" hidden novalidate>
+            <div class="col-xl-6">
+                <label class="form-label" for="jwt-enc-header">{{ 'jwt.decoder.header'|trans }}</label>
+                <textarea class="form-control jwt-json-input mb-3" id="jwt-enc-header" name="header" rows="5" spellcheck="false">{{ {alg: 'HS256', typ: 'JWT'}|json_encode(constant('JSON_PRETTY_PRINT')) }}</textarea>
+
+                <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-2">
+                    <label class="form-label mb-0" for="jwt-enc-payload">{{ 'jwt.decoder.payload'|trans }}</label>
+                    <div class="d-flex flex-wrap gap-1">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-jwt-time="iat">iat = {{ 'jwt.encoder.now'|trans }}</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-jwt-time="exp:3600">exp + 1 h</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-jwt-time="exp:86400">exp + 24 h</button>
+                    </div>
+                </div>
+                <textarea class="form-control jwt-json-input" id="jwt-enc-payload" name="payload" rows="12" spellcheck="false">{{ {sub: '1234567890', name: 'Erika Mustermann', admin: false}|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_UNICODE')) }}</textarea>
+            </div>
+
+            <div class="col-xl-6">
+                <label class="form-label" for="jwt-enc-alg">{{ 'jwt.signature.algorithm'|trans }}</label>
+                <select class="form-select mb-3" id="jwt-enc-alg" name="alg">
+                    {% for alg in algorithms %}<option value="{{ alg }}">{{ alg }}</option>{% endfor %}
+                </select>
+
+                <div data-jwt-sign-secret-group>
+                    <label class="form-label" for="jwt-enc-secret">{{ 'jwt.signature.secret'|trans }}</label>
+                    <input class="form-control jwt-key-input" id="jwt-enc-secret" name="signSecret" type="text" autocomplete="off" spellcheck="false">
+                    <div class="form-check form-switch mt-2 mb-3">
+                        <input class="form-check-input" type="checkbox" role="switch" id="jwt-enc-secret-base64" name="signSecretBase64">
+                        <label class="form-check-label" for="jwt-enc-secret-base64">{{ 'jwt.signature.secret_base64'|trans }}</label>
+                    </div>
+                </div>
+                <div data-jwt-sign-key-group hidden>
+                    <label class="form-label" for="jwt-enc-key">{{ 'jwt.encoder.private_key'|trans }}</label>
+                    <textarea class="form-control jwt-key-input mb-1" id="jwt-enc-key" name="signKey" rows="6" spellcheck="false"
+                              placeholder="-----BEGIN PRIVATE KEY-----&#10;…&#10;-----END PRIVATE KEY-----"></textarea>
+                    <p class="form-text mb-3">{{ 'jwt.encoder.private_key_hint'|trans }}</p>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-end mb-2">
+                    <p class="form-label mb-0">{{ 'jwt.encoder.result'|trans }}</p>
+                    <div class="d-flex gap-1">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-jwt-action="to-decoder">{{ 'jwt.encoder.to_decoder'|trans }}</button>
+                        <button type="button" class="btn btn-sm btn-primary" data-jwt-action="copy-encoded">{{ 'tool.copy'|trans }}</button>
+                    </div>
+                </div>
+                <pre class="jwt-encoded" data-jwt-encoded aria-live="polite"></pre>
+                <p class="jwt-signature-result" data-jwt-encoder-status aria-live="polite"></p>
+            </div>
+        </form>
+    </div>
+{% endblock %}
