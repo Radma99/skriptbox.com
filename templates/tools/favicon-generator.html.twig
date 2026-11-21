@@ -1,0 +1,93 @@
+{% extends 'layout/tool.html.twig' %}
+{% import 'macros/_form.html.twig' as form %}
+
+{% set tool_key = 'fg' %}
+{% set tool_entry = 'favicon-generator' %}
+
+{% block tool %}
+    <div data-favicon-generator data-i18n="{{ {
+        copied: 'tool.copied'|trans,
+        readError: 'fg.error.read'|trans,
+    }|json_encode|e('html_attr') }}">
+        <div class="tool-tabs" role="tablist" aria-label="{{ 'fg.mode.label'|trans }}">
+            <button type="button" class="tool-tabs__item active" role="tab" aria-selected="true" aria-controls="fg-panel-text" data-fg-mode="text">{{ 'fg.mode.text'|trans }}</button>
+            <button type="button" class="tool-tabs__item" role="tab" aria-selected="false" aria-controls="fg-panel-image" data-fg-mode="image">{{ 'fg.mode.image'|trans }}</button>
+        </div>
+
+        <div class="row g-4 g-lg-5">
+            <form class="col-lg-6" data-fg-form novalidate>
+                <div id="fg-panel-text" role="tabpanel" data-fg-panel="text">
+                    <div class="row g-3">
+                        {{ form.input('text', 'fg.field.text'|trans, {id: 'fg-text', value: 'S', wrapper_class: 'col-4', placeholder: 'A'}) }}
+                        {{ form.select('font', 'fg.field.font'|trans, {
+                            sans: 'fg.font.sans'|trans,
+                            serif: 'fg.font.serif'|trans,
+                            mono: 'fg.font.mono'|trans,
+                        }, {id: 'fg-font', selected: 'sans', wrapper_class: 'col-4'}) }}
+                        {{ form.select('weight', 'fg.field.weight'|trans, {
+                            400: 'fg.weight.regular'|trans,
+                            700: 'fg.weight.bold'|trans,
+                            900: 'fg.weight.black'|trans,
+                        }, {id: 'fg-weight', selected: '700', wrapper_class: 'col-4'}) }}
+                        <div class="col-6">
+                            <label class="form-label" for="fg-color">{{ 'fg.field.color'|trans }}</label>
+                            <input class="form-control form-control-color w-100" id="fg-color" name="color" type="color" value="#ffffff">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label" for="fg-text-scale">{{ 'fg.field.text_scale'|trans }}</label>
+                            <div class="tool-range">
+                                <input class="form-range" id="fg-text-scale" name="textScale" type="range" min="60" max="130" step="5" value="100">
+                                <output for="fg-text-scale" data-range-value="textScale">100 %</output>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="fg-panel-image" role="tabpanel" data-fg-panel="image" hidden>
+                    <label class="form-label" for="fg-file">{{ 'fg.field.file'|trans }}</label>
+                    <input class="form-control mb-1" id="fg-file" name="file" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+                    <p class="form-text mb-3">{{ 'fg.field.file_hint'|trans }}</p>
+                    <label class="form-label" for="fg-padding">{{ 'fg.field.padding'|trans }}</label>
+                    <div class="tool-range mb-3">
+                        <input class="form-range" id="fg-padding" name="padding" type="range" min="0" max="25" value="8">
+                        <output for="fg-padding" data-range-value="padding">8 %</output>
+                    </div>
+                    <p class="alert alert-danger" data-fg-error hidden></p>
+                </div>
+
+                <div class="row g-3 mt-1">
+                    {{ form.select('shape', 'fg.field.shape'|trans, {
+                        rounded: 'fg.shape.rounded'|trans,
+                        circle: 'fg.shape.circle'|trans,
+                        square: 'fg.shape.square'|trans,
+                    }, {id: 'fg-shape', selected: 'rounded', wrapper_class: 'col-6'}) }}
+                    <div class="col-6">
+                        <label class="form-label" for="fg-background">{{ 'fg.field.background'|trans }}</label>
+                        <input class="form-control form-control-color w-100" id="fg-background" name="background" type="color" value="#1f5fae">
+                    </div>
+                    {{ form.switch('transparent', 'fg.field.transparent'|trans, {id: 'fg-transparent', wrapper_class: 'col-12'}) }}
+                    {{ form.input('name', 'fg.field.name'|trans, {id: 'fg-name', placeholder: 'Musterfirma', wrapper_class: 'col-12'}) }}
+                </div>
+            </form>
+
+            <div class="col-lg-6">
+                <p class="form-label">{{ 'fg.preview.title'|trans }}</p>
+                <div class="fg-previews" data-fg-previews></div>
+
+                <div class="fg-tab" aria-hidden="true">
+                    <img data-fg-tab-icon alt="">
+                    <span>{{ 'fg.preview.tab'|trans }}</span>
+                </div>
+
+                <button type="button" class="btn btn-primary btn-lg w-100 mb-4" data-fg-action="zip">{{ 'fg.action.zip'|trans }}</button>
+
+                <div class="d-flex justify-content-between align-items-end mb-2">
+                    <p class="form-label mb-0">{{ 'fg.code.title'|trans }}</p>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-fg-action="copy">{{ 'tool.copy'|trans }}</button>
+                </div>
+                <pre class="fg-code" data-fg-code></pre>
+                <p class="form-text">{{ 'fg.code.hint'|trans }}</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

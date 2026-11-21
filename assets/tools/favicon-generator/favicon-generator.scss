@@ -1,0 +1,63 @@
+.fg-previews {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    // Schachbrett, damit Transparenz sichtbar ist
+    background: repeating-conic-gradient(#f1f3f5 0 25%, #fff 0 50%) 50% / 16px 16px;
+}
+
+.fg-preview {
+    display: grid;
+    justify-items: center;
+    gap: .35rem;
+    margin: 0;
+
+    canvas {
+        image-rendering: auto;
+    }
+
+    figcaption {
+        color: var(--sb-muted);
+        font-size: .75rem;
+    }
+}
+
+// Nachbau eines Browser-Tabs als Vorschau
+.fg-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    max-width: 100%;
+    margin: 1rem 0;
+    padding: .5rem .875rem;
+    border-radius: .625rem .625rem 0 0;
+    background: #dee1e6;
+    font-size: .8125rem;
+
+    img {
+        width: 16px;
+        height: 16px;
+    }
+
+    span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+.fg-code {
+    margin: 0 0 .75rem;
+    padding: .875rem 1rem;
+    border-radius: var(--bs-border-radius);
+    background: #1d2733;
+    color: #e9eef5;
+    font-family: var(--bs-font-monospace);
+    font-size: .8125rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
