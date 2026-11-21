@@ -1,0 +1,59 @@
+{% extends 'layout/tool.html.twig' %}
+
+{% set tool_key = 'tc' %}
+{% set tool_entry = 'text-counter' %}
+
+{% set stats = {
+    characters: 'tc.stat.characters',
+    charactersNoSpaces: 'tc.stat.characters_no_spaces',
+    words: 'tc.stat.words',
+    sentences: 'tc.stat.sentences',
+    paragraphs: 'tc.stat.paragraphs',
+    lines: 'tc.stat.lines',
+    readingTime: 'tc.stat.reading_time',
+    speakingTime: 'tc.stat.speaking_time',
+} %}
+
+{% block tool %}
+    <div data-text-counter data-i18n="{{ {
+        seconds: 'tc.unit.seconds'|trans,
+        minutes: 'tc.unit.minutes'|trans,
+        word: 'tc.top.word'|trans,
+        count: 'tc.top.count'|trans,
+        share: 'tc.top.share'|trans,
+        noTopWords: 'tc.top.empty'|trans,
+        limit_google_title: 'tc.limit.google_title'|trans,
+        limit_meta_description: 'tc.limit.meta_description'|trans,
+        limit_sms: 'tc.limit.sms'|trans,
+        limit_x_post: 'tc.limit.x_post'|trans,
+        limit_instagram: 'tc.limit.instagram'|trans,
+        limit_linkedin: 'tc.limit.linkedin'|trans,
+    }|json_encode|e('html_attr') }}">
+        <div class="row g-4 g-lg-5">
+            <div class="col-lg-7">
+                <div class="d-flex justify-content-between align-items-end mb-2">
+                    <label class="form-label mb-0" for="tc-input">{{ 'tc.field.text'|trans }}</label>
+                    <button type="button" class="btn btn-sm btn-link" data-tc-action="clear">{{ 'tc.action.clear'|trans }}</button>
+                </div>
+                <textarea class="form-control tc-input" id="tc-input" data-tc-input rows="10" placeholder="{{ 'tc.field.placeholder'|trans }}"></textarea>
+
+                <h2 class="tc-heading">{{ 'tc.top.title'|trans }}</h2>
+                <div data-tc-top-words aria-live="polite"></div>
+            </div>
+
+            <div class="col-lg-5">
+                <dl class="stat-grid" aria-live="polite">
+                    {% for key, label in stats %}
+                        <div class="stat-grid__item">
+                            <dt>{{ label|trans }}</dt>
+                            <dd data-tc-stat="{{ key }}">0</dd>
+                        </div>
+                    {% endfor %}
+                </dl>
+
+                <h2 class="tc-heading">{{ 'tc.limit.title'|trans }}</h2>
+                <ul class="tc-limits" data-tc-limits></ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}

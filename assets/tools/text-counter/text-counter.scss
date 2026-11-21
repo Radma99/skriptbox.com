@@ -1,0 +1,74 @@
+.tc-input {
+    min-height: 16rem;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    resize: vertical;
+}
+
+.tc-heading {
+    margin: 2rem 0 1rem;
+    font-size: 1.125rem;
+}
+
+.tc-limits {
+    display: grid;
+    gap: .875rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tc-limit {
+    &__head {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: .35rem;
+        font-size: .875rem;
+    }
+
+    &__count {
+        color: var(--sb-muted);
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__bar {
+        height: .375rem;
+        border-radius: 999px;
+        background: var(--bs-secondary-bg);
+        overflow: hidden;
+
+        span {
+            display: block;
+            width: 0;
+            height: 100%;
+            border-radius: inherit;
+            background: var(--sb-brand);
+            transition: width .15s;
+        }
+    }
+
+    &.is-over {
+        .tc-limit__count {
+            color: var(--bs-danger);
+            font-weight: 600;
+        }
+
+        .tc-limit__bar span {
+            background: var(--bs-danger);
+        }
+    }
+}
+
+.tc-table {
+    font-size: .9375rem;
+
+    td:first-child {
+        overflow-wrap: anywhere;
+    }
+}
+
+.tc-empty {
+    color: var(--sb-muted);
+    font-size: .875rem;
+}
