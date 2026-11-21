@@ -1,0 +1,71 @@
+{% extends 'layout/tool.html.twig' %}
+{% import 'macros/_form.html.twig' as form %}
+
+{% set tool_key = 'tg' %}
+{% set tool_entry = 'text-generator' %}
+
+{% set blocks = {
+    headline: 'tg.block.headline',
+    teaser: 'tg.block.teaser',
+    text: 'tg.block.text',
+} %}
+
+{% block tool %}
+    <div data-text-generator data-i18n="{{ {
+        copied: 'tool.copied'|trans,
+        stats: 'tg.stats'|trans,
+    }|json_encode|e('html_attr') }}">
+        <form class="row g-3 align-items-end mb-3" data-tg-form novalidate>
+            {{ form.select('language', 'tg.field.language'|trans, {
+                de: 'tg.language.de'|trans,
+                en: 'tg.language.en'|trans,
+            }, {id: 'tg-language', selected: app.request.locale == 'en' ? 'en' : 'de', wrapper_class: 'col-6 col-lg-2'}) }}
+
+            {{ form.select('topic', 'tg.field.topic'|trans, {
+                general: 'tg.topic.general'|trans,
+                company: 'tg.topic.company'|trans,
+                services: 'tg.topic.services'|trans,
+                products: 'tg.topic.products'|trans,
+                news: 'tg.topic.news'|trans,
+                events: 'tg.topic.events'|trans,
+                careers: 'tg.topic.careers'|trans,
+                association: 'tg.topic.association'|trans,
+            }, {id: 'tg-topic', selected: 'company', wrapper_class: 'col-6 col-lg-4'}) }}
+
+            {{ form.input('count', 'tg.field.count'|trans, {id: 'tg-count', type: 'number', inputmode: 'numeric', value: 3, wrapper_class: 'col-4 col-lg-2'}) }}
+
+            {{ form.select('unit', 'tg.field.unit'|trans, {
+                paragraphs: 'tg.unit.paragraphs'|trans,
+                sentences: 'tg.unit.sentences'|trans,
+                words: 'tg.unit.words'|trans,
+            }, {id: 'tg-unit', selected: 'paragraphs', wrapper_class: 'col-8 col-lg-2'}) }}
+
+            {{ form.select('format', 'tg.field.format'|trans, {
+                text: 'tg.format.text'|trans,
+                html: 'tg.format.html'|trans,
+            }, {id: 'tg-format', selected: 'text', wrapper_class: 'col-6 col-lg-2'}) }}
+
+            {{ form.switch('mark', 'tg.field.mark'|trans, {id: 'tg-mark', wrapper_class: 'col-12'}) }}
+        </form>
+
+        <div class="tg-toolbar">
+            <button type="button" class="btn btn-outline-secondary" data-tg-action="generate">{{ 'tg.action.generate'|trans }}</button>
+            <button type="button" class="btn btn-primary" data-tg-copy="all">{{ 'tg.action.copy_all'|trans }}</button>
+        </div>
+
+        <div class="tg-blocks" aria-live="polite">
+            {% for key, label in blocks %}
+                <section class="tg-block tg-block--{{ key }}" aria-labelledby="tg-label-{{ key }}">
+                    <div class="tg-block__head">
+                        <h2 class="tg-block__label" id="tg-label-{{ key }}">
+                            {{ label|trans }}
+                            {% if key == 'text' %}<span class="tg-block__meta" data-tg-stats></span>{% endif %}
+                        </h2>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-tg-copy="{{ key }}">{{ 'tool.copy'|trans }}</button>
+                    </div>
+                    <div class="tg-block__body" data-tg-output="{{ key }}"></div>
+                </section>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
