@@ -1,0 +1,174 @@
+.jf-input-head,
+.jf-output-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .5rem;
+}
+
+.jf-input-actions,
+.jf-output-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.jf-input {
+    min-height: 16rem;
+    font-family: var(--bs-font-monospace);
+    font-size: .875rem;
+    line-height: 1.5;
+    tab-size: 4;
+    resize: vertical;
+
+    &.is-dragover {
+        border-color: var(--sb-brand);
+        background: var(--bs-primary-bg-subtle);
+    }
+}
+
+.jf-alert {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin: 0 0 1rem;
+    padding: .6rem 1rem;
+    border-radius: var(--bs-border-radius);
+    font-weight: 500;
+
+    &--success {
+        background: var(--bs-success-bg-subtle);
+        color: var(--bs-success-text-emphasis);
+
+        &::before {
+            content: '✓';
+            font-weight: 700;
+        }
+    }
+
+    &--danger {
+        background: var(--bs-danger-bg-subtle);
+        color: var(--bs-danger-text-emphasis);
+    }
+}
+
+.jf-error {
+    margin: 0 0 1rem;
+    padding: 1rem;
+    border: 1px solid var(--bs-danger-border-subtle);
+    border-radius: var(--bs-border-radius);
+    background: var(--bs-danger-bg-subtle);
+    color: var(--bs-danger-text-emphasis);
+
+    &__title {
+        margin-bottom: .25rem;
+        font-weight: 700;
+    }
+
+    &__message {
+        margin-bottom: .75rem;
+
+        code {
+            padding: .05rem .3rem;
+            border-radius: .25rem;
+            background: rgb(255 255 255 / 60%);
+            color: inherit;
+            overflow-wrap: anywhere;
+        }
+    }
+}
+
+// Ausschnitt um die Fehlerstelle; lange Zeilen scrollen innerhalb des Kastens, nicht die Seite
+.jf-excerpt {
+    margin: 0 0 .75rem;
+    padding: .75rem 1rem;
+    border-radius: var(--bs-border-radius);
+    background: #1d2733;
+    color: #e9eef5;
+    font-size: .8125rem;
+    line-height: 1.6;
+    tab-size: 4;
+    white-space: pre;
+    overflow-x: auto;
+
+    &__number {
+        display: inline-block;
+        margin-right: 1rem;
+        color: #9aa7b7;
+        user-select: none;
+    }
+
+    mark {
+        padding: 0 .1rem;
+        border-radius: .2rem;
+        background: #f2545b;
+        color: #fff;
+    }
+}
+
+.jf-warnings {
+    margin: 0 0 1rem;
+    padding: .75rem 1rem .75rem 2rem;
+    border-radius: var(--bs-border-radius);
+    background: var(--bs-warning-bg-subtle);
+    color: var(--bs-warning-text-emphasis);
+    font-size: .875rem;
+
+    li + li {
+        margin-top: .35rem;
+    }
+
+    code {
+        color: inherit;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+}
+
+.jf-line-link {
+    padding: 0;
+    border: 0;
+    color: inherit;
+    font-size: inherit;
+    vertical-align: baseline;
+}
+
+.jf-output {
+    min-height: 6rem;
+    max-height: 36rem;
+    margin: 0 0 1.5rem;
+    padding: 1rem;
+    border-radius: var(--bs-border-radius);
+    background: #1d2733;
+    color: #e9eef5;
+    font-family: var(--bs-font-monospace);
+    font-size: .875rem;
+    line-height: 1.5;
+    tab-size: 4;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    overflow: auto;
+
+    &.is-empty {
+        color: #9aa7b7;
+    }
+
+    // Farben mit ausreichend Kontrast auf dem dunklen Hintergrund
+    .jf-key {
+        color: #8cc8ff;
+    }
+
+    .jf-string {
+        color: #a5e0a0;
+    }
+
+    .jf-number {
+        color: #ffc27a;
+    }
+
+    .jf-literal {
+        color: #e0a8ff;
+    }
+}

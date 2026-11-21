@@ -1,0 +1,99 @@
+{% extends 'layout/tool.html.twig' %}
+{% import 'macros/_form.html.twig' as form %}
+
+{% set tool_key = 'jf' %}
+{% set tool_entry = 'json-formatter' %}
+
+{% set errors = ['unclosed', 'mismatched_bracket', 'trailing_comma', 'missing_comma', 'expected_comma_object', 'expected_comma_array',
+    'expected_colon', 'expected_key', 'expected_value', 'unquoted_key', 'single_quotes', 'smart_quotes', 'comment',
+    'unterminated_string', 'control_char', 'invalid_escape', 'invalid_unicode', 'invalid_number', 'not_a_number',
+    'invalid_literal', 'extra_bracket', 'trailing_data'] %}
+{% set warnings = ['bom', 'duplicate_key', 'precision'] %}
+
+{% block tool %}
+    {% set i18n = {
+        copied: 'tool.copied'|trans,
+        valid: 'jf.status.valid'|trans,
+        invalid: 'jf.status.invalid'|trans,
+        position: 'jf.status.position'|trans,
+        jump: 'jf.status.jump'|trans,
+        line: 'jf.status.line'|trans,
+        more: 'jf.status.more'|trans,
+        end: 'jf.status.end'|trans,
+        empty: 'jf.output.empty'|trans,
+        output_invalid: 'jf.output.invalid'|trans,
+        too_large: 'jf.output.too_large'|trans,
+        file_error: 'jf.output.file_error'|trans,
+    } %}
+    {% for key in errors %}
+        {% set i18n = i18n|merge({('error_' ~ key): ('jf.error.' ~ key)|trans}) %}
+    {% endfor %}
+    {% for key in warnings %}
+        {% set i18n = i18n|merge({('warning_' ~ key): ('jf.warning.' ~ key)|trans}) %}
+    {% endfor %}
+
+    <div data-json-formatter data-i18n="{{ i18n|json_encode|e('html_attr') }}">
+        <div class="tool-tabs" role="tablist" aria-label="{{ 'jf.mode.label'|trans }}">
+            <button type="button" class="tool-tabs__item active" role="tab" aria-selected="true" aria-controls="jf-panel" data-jf-mode="format">{{ 'jf.mode.format'|trans }}</button>
+            <button type="button" class="tool-tabs__item" role="tab" aria-selected="false" aria-controls="jf-panel" data-jf-mode="minify">{{ 'jf.mode.minify'|trans }}</button>
+        </div>
+
+        <div id="jf-panel" role="tabpanel">
+            <form class="row g-3" data-jf-form novalidate>
+                <div class="col-12">
+                    <div class="jf-input-head">
+                        <label class="form-label mb-0" for="jf-input">{{ 'jf.field.input'|trans }}</label>
+                        <div class="jf-input-actions">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-jf-action="example">{{ 'jf.action.example'|trans }}</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-jf-action="open">{{ 'jf.action.open'|trans }}</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-jf-action="clear">{{ 'jf.action.clear'|trans }}</button>
+                            <input type="file" accept=".json,application/json,text/plain" hidden data-jf-file>
+                        </div>
+                    </div>
+                    <textarea class="form-control jf-input" id="jf-input" name="input" rows="12" wrap="off" spellcheck="false"
+                              autocomplete="off" autocapitalize="off" aria-describedby="jf-input-hint" data-jf-input></textarea>
+                    <p class="form-text mb-0" id="jf-input-hint">{{ 'jf.field.input_hint'|trans }}</p>
+                </div>
+
+                <div class="col-sm-6" data-jf-options="format">
+                    {{ form.select('indent', 'jf.field.indent'|trans, {
+                        '2': 'jf.field.indent_2'|trans,
+                        '4': 'jf.field.indent_4'|trans,
+                        tab: 'jf.field.indent_tab'|trans,
+                    }, {id: 'jf-indent', selected: '2', wrapper_class: 'mb-0'}) }}
+                </div>
+
+                <div class="col-sm-6 align-self-sm-end">
+                    {{ form.switch('sortKeys', 'jf.field.sort_keys'|trans, {id: 'jf-sort', wrapper_class: 'jf-switch mb-0'}) }}
+                </div>
+            </form>
+
+            <hr class="my-4">
+
+            <div class="jf-status" data-jf-status aria-live="polite"></div>
+            <ul class="jf-warnings" data-jf-warnings hidden></ul>
+
+            <div class="jf-output-head">
+                <p class="form-label mb-0">{{ 'jf.output.title'|trans }}</p>
+                <div class="jf-output-actions">
+                    <button type="button" class="btn btn-outline-primary" data-jf-action="download">{{ 'jf.action.download'|trans }}</button>
+                    <button type="button" class="btn btn-primary" data-jf-action="copy">{{ 'tool.copy'|trans }}</button>
+                </div>
+            </div>
+
+            <pre class="jf-output" data-jf-output tabindex="0" aria-label="{{ 'jf.output.title'|trans }}"></pre>
+
+            <div data-jf-stats hidden>
+                <p class="form-label">{{ 'jf.stats.title'|trans }}</p>
+                <dl class="stat-grid">
+                    {% for key in ['depth', 'keys', 'objects', 'arrays', 'values', 'input_size', 'output_size'] %}
+                        <div class="stat-grid__item">
+                            <dt>{{ ('jf.stats.' ~ key)|trans }}</dt>
+                            <dd data-jf-stat="{{ key }}">0</dd>
+                        </div>
+                    {% endfor %}
+                </dl>
+            </div>
+        </div>
+    </div>
+{% endblock %}
