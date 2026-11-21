@@ -1,0 +1,111 @@
+{% extends 'layout/tool.html.twig' %}
+{% import 'macros/_form.html.twig' as form %}
+
+{% set tool_key = 'ue' %}
+{% set tool_entry = 'url-encoder' %}
+
+{% set problems = ['whitespace', 'invalid_percent', 'invalid_utf8', 'double_encoded'] %}
+
+{% block tool %}
+    {% set i18n = {
+        copied: 'tool.copied'|trans,
+        input_encode: 'ue.field.input_encode'|trans,
+        input_decode: 'ue.field.input_decode'|trans,
+        empty: 'ue.output.empty'|trans,
+        empty_connection: 'ue.connection.empty'|trans,
+    } %}
+    {% for key in problems %}
+        {% set i18n = i18n|merge({('problem_' ~ key): ('ue.problem.' ~ key)|trans}) %}
+    {% endfor %}
+
+    <div data-url-encoder data-i18n="{{ i18n|json_encode|e('html_attr') }}">
+        <div class="tool-tabs" role="tablist" aria-label="{{ 'ue.mode.label'|trans }}">
+            <button type="button" class="tool-tabs__item active" role="tab" aria-selected="true" aria-controls="ue-panel-text" data-ue-mode="encode">{{ 'ue.mode.encode'|trans }}</button>
+            <button type="button" class="tool-tabs__item" role="tab" aria-selected="false" aria-controls="ue-panel-text" data-ue-mode="decode">{{ 'ue.mode.decode'|trans }}</button>
+            <button type="button" class="tool-tabs__item" role="tab" aria-selected="false" aria-controls="ue-panel-connection" data-ue-mode="connection">{{ 'ue.mode.connection'|trans }}</button>
+        </div>
+
+        <div id="ue-panel-text" role="tabpanel" data-ue-panel="text">
+            <form class="row g-4" data-ue-form novalidate>
+                <div class="col-lg-7">
+                    <label class="form-label" for="ue-input" data-ue-input-label>{{ 'ue.field.input_encode'|trans }}</label>
+                    <textarea class="form-control ue-input" id="ue-input" name="input" rows="4" spellcheck="false"
+                              autocomplete="off" autocapitalize="off"></textarea>
+                </div>
+
+                <div class="col-lg-5">
+                    <div data-ue-options="encode">
+                        {{ form.select('variant', 'ue.field.variant'|trans, {
+                            rfc3986: 'ue.variant.rfc3986'|trans,
+                            form: 'ue.variant.form'|trans,
+                            component: 'ue.variant.component'|trans,
+                            uri: 'ue.variant.uri'|trans,
+                            all: 'ue.variant.all'|trans,
+                        }, {id: 'ue-variant', selected: 'rfc3986'}) }}
+                        {{ form.switch('lowercase', 'ue.field.lowercase'|trans, {id: 'ue-lowercase', wrapper_class: 'mb-2'}) }}
+                    </div>
+
+                    <div data-ue-options="decode" hidden>
+                        {{ form.switch('plusAsSpace', 'ue.field.plus_as_space'|trans, {id: 'ue-plus', wrapper_class: 'mb-2'}) }}
+                    </div>
+
+                    {{ form.switch('perLine', 'ue.field.per_line'|trans, {id: 'ue-lines', wrapper_class: 'mb-2'}) }}
+                </div>
+            </form>
+
+            <hr class="my-4">
+
+            <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                <p class="form-label mb-0">{{ 'ue.output.title'|trans }}</p>
+                <button type="button" class="btn btn-primary" data-ue-action="copy">{{ 'tool.copy'|trans }}</button>
+            </div>
+
+            <ul class="ue-problems" data-ue-problems hidden aria-live="polite"></ul>
+            <pre class="ue-output" data-ue-output tabindex="0" aria-live="polite"></pre>
+
+            <div class="ue-details" data-ue-details hidden>
+                <div data-ue-chars-section>
+                    <p class="form-label">{{ 'ue.output.chars'|trans }}</p>
+                    <ul class="ue-chars" data-ue-chars></ul>
+                </div>
+
+                <div data-ue-code-section>
+                    <p class="form-label">{{ 'ue.output.code'|trans }}</p>
+                    <dl class="ue-code" data-ue-code></dl>
+                </div>
+            </div>
+        </div>
+
+        <div id="ue-panel-connection" role="tabpanel" data-ue-panel="connection" hidden>
+            <p class="text-body-secondary">{{ 'ue.connection.intro'|trans }}</p>
+
+            <form class="row g-3" data-ue-connection novalidate>
+                <div class="col-sm-4">
+                    <label class="form-label" for="ue-scheme">{{ 'ue.connection.scheme'|trans }}</label>
+                    <input class="form-control" id="ue-scheme" name="scheme" type="text" value="mysql" list="ue-schemes" autocomplete="off" spellcheck="false">
+                    <datalist id="ue-schemes">
+                        {% for scheme in ['mysql', 'mariadb', 'postgresql', 'redis', 'rediss', 'mongodb', 'mongodb+srv', 'amqp', 'smtp', 'ftp', 'sftp', 'https'] %}
+                            <option value="{{ scheme }}">
+                        {% endfor %}
+                    </datalist>
+                </div>
+                {{ form.input('host', 'ue.connection.host'|trans, {id: 'ue-host', placeholder: 'localhost', autocomplete: 'off', wrapper_class: 'col-sm-5'}) }}
+                {{ form.input('port', 'ue.connection.port'|trans, {id: 'ue-port', placeholder: '3306', inputmode: 'numeric', autocomplete: 'off', wrapper_class: 'col-sm-3'}) }}
+                {{ form.input('user', 'ue.connection.user'|trans, {id: 'ue-user', autocomplete: 'off', wrapper_class: 'col-sm-6'}) }}
+                {{ form.input('password', 'ue.connection.password'|trans, {id: 'ue-password', autocomplete: 'off', wrapper_class: 'col-sm-6'}) }}
+                {{ form.input('path', 'ue.connection.path'|trans, {id: 'ue-path', placeholder: 'app', autocomplete: 'off', wrapper_class: 'col-sm-6'}) }}
+                {{ form.input('query', 'ue.connection.query'|trans, {id: 'ue-query', placeholder: 'serverVersion=8.0&charset=utf8mb4', autocomplete: 'off', wrapper_class: 'col-sm-6'}) }}
+            </form>
+
+            <hr class="my-4">
+
+            <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                <p class="form-label mb-0">{{ 'ue.connection.result'|trans }}</p>
+                <button type="button" class="btn btn-primary" data-ue-action="copy-connection">{{ 'tool.copy'|trans }}</button>
+            </div>
+
+            <pre class="ue-output" data-ue-connection-output tabindex="0" aria-live="polite"></pre>
+            <p class="form-text">{{ 'ue.connection.hint'|trans }}</p>
+        </div>
+    </div>
+{% endblock %}

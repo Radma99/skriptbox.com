@@ -1,0 +1,87 @@
+.ue-input {
+    min-height: 7rem;
+    font-family: var(--bs-font-monospace);
+    font-size: .9375rem;
+}
+
+.ue-output {
+    min-height: 4.5rem;
+    max-height: 24rem;
+    margin: 0 0 1.5rem;
+    padding: 1rem;
+    border-radius: var(--bs-border-radius);
+    background: #1d2733;
+    color: #e9eef5;
+    font-family: var(--bs-font-monospace);
+    font-size: .9375rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    overflow: auto;
+
+    &.is-empty {
+        color: #9aa7b7;
+    }
+}
+
+.ue-problems {
+    margin: 0 0 1rem;
+    padding: .75rem 1rem .75rem 2rem;
+    border-radius: var(--bs-border-radius);
+    background: var(--bs-warning-bg-subtle);
+    color: var(--bs-warning-text-emphasis);
+    font-size: .875rem;
+}
+
+.ue-details {
+    display: grid;
+    gap: 1.5rem;
+}
+
+// Kodierte Zeichen als kleine Kacheln: Zeichen oben, Kodierung darunter
+.ue-chars {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 3.5rem;
+        padding: .35rem .6rem;
+        border: 1px solid var(--bs-border-color);
+        border-radius: var(--bs-border-radius);
+        background: var(--sb-surface);
+    }
+
+    span {
+        font-family: var(--bs-font-monospace);
+        font-weight: 600;
+    }
+
+    code {
+        color: var(--sb-muted);
+        font-size: .8125rem;
+    }
+}
+
+.ue-code {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: .35rem 1rem;
+    margin: 0;
+    font-size: .875rem;
+
+    dt {
+        font-weight: 500;
+    }
+
+    dd {
+        margin: 0;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+}
