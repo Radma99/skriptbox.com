@@ -1,0 +1,67 @@
+{% extends 'layout/tool.html.twig' %}
+{% import 'macros/_form.html.twig' as form %}
+
+{% set tool_key = 'rg' %}
+{% set tool_entry = 'redirect-generator' %}
+
+{% set problems = ['missing_target', 'invalid', 'foreign_source', 'self', 'duplicate', 'loop', 'chain', 'chain_resolved'] %}
+
+{% block tool %}
+    {% set i18n = {
+        copied: 'tool.copied'|trans,
+        empty: 'rg.output.empty'|trans,
+        summary: 'rg.output.summary'|trans,
+        line: 'rg.problem.line'|trans,
+        example: 'rg.example'|trans,
+    } %}
+    {% for key in problems %}
+        {% set i18n = i18n|merge({('problem_' ~ key): ('rg.problem.' ~ key)|trans}) %}
+    {% endfor %}
+
+    <div data-redirect-generator data-i18n="{{ i18n|json_encode|e('html_attr') }}">
+        <form class="row g-4 g-lg-5" data-rg-form novalidate>
+            <div class="col-lg-7">
+                <div class="d-flex justify-content-between align-items-end mb-2">
+                    <label class="form-label mb-0" for="rg-input">{{ 'rg.field.input'|trans }}</label>
+                    <button type="button" class="btn btn-sm btn-link" data-rg-action="example">{{ 'rg.action.example'|trans }}</button>
+                </div>
+                <textarea class="form-control rg-input" id="rg-input" name="input" rows="10" spellcheck="false"
+                          placeholder="/alte-seite.html;/neue-seite/"></textarea>
+                <p class="form-text">{{ 'rg.field.input_hint'|trans }}</p>
+            </div>
+
+            <div class="col-lg-5">
+                {{ form.select('format', 'rg.field.format'|trans, {
+                    apache: 'Apache (.htaccess)',
+                    nginx: 'nginx',
+                    csv: 'rg.format.csv'|trans,
+                }, {id: 'rg-format', selected: 'apache'}) }}
+
+                {{ form.select('status', 'rg.field.status'|trans, {
+                    301: 'rg.status.301'|trans,
+                    302: 'rg.status.302'|trans,
+                    308: 'rg.status.308'|trans,
+                }, {id: 'rg-status', selected: '301'}) }}
+
+                {{ form.input('domain', 'rg.field.domain'|trans, {id: 'rg-domain', placeholder: 'www.kunde.de'}) }}
+
+                {{ form.switch('resolveChains', 'rg.field.resolve_chains'|trans, {id: 'rg-chains', checked: true, wrapper_class: 'mb-2'}) }}
+                {{ form.switch('ignoreTrailingSlash', 'rg.field.trailing_slash'|trans, {id: 'rg-slash', checked: true, wrapper_class: 'mb-2'}) }}
+                {{ form.switch('ignoreCase', 'rg.field.ignore_case'|trans, {id: 'rg-case', wrapper_class: 'mb-2'}) }}
+            </div>
+        </form>
+
+        <hr class="my-4">
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+            <p class="form-label mb-0" data-rg-summary aria-live="polite"></p>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary" data-rg-action="download">{{ 'rg.action.download'|trans }}</button>
+                <button type="button" class="btn btn-primary" data-rg-action="copy">{{ 'tool.copy'|trans }}</button>
+            </div>
+        </div>
+
+        <ul class="rg-problems" data-rg-problems hidden aria-live="polite"></ul>
+        <pre class="rg-output" data-rg-output tabindex="0"></pre>
+    </div>
+{% endblock %}
