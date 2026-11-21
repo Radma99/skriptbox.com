@@ -1,0 +1,97 @@
+{% extends 'layout/tool.html.twig' %}
+{% import 'macros/_form.html.twig' as form %}
+
+{% set tool_key = 'hg' %}
+{% set tool_entry = 'hash-generator' %}
+
+{% block tool %}
+    {% set i18n = {
+        copy: 'tool.copy'|trans,
+        copied: 'tool.copied'|trans,
+        empty_text: 'hg.output.empty_text'|trans,
+        empty_file: 'hg.output.empty_file'|trans,
+        text_bytes: 'hg.output.text_bytes'|trans,
+        reading: 'hg.output.reading'|trans,
+        computing: 'hg.output.computing'|trans,
+        cancelled: 'hg.output.cancelled'|trans,
+        weak: 'hg.output.weak'|trans,
+        match: 'hg.output.match'|trans,
+        too_large: 'hg.output.too_large'|trans,
+        no_memory: 'hg.output.no_memory'|trans,
+        compare_match: 'hg.compare.match'|trans,
+        compare_mismatch: 'hg.compare.mismatch'|trans,
+        compare_mismatch_length: 'hg.compare.mismatch_length'|trans,
+        error_read: 'hg.error.read'|trans,
+    } %}
+
+    <div data-hash-generator data-i18n="{{ i18n|json_encode|e('html_attr') }}">
+        <div class="tool-tabs" role="tablist" aria-label="{{ 'hg.mode.label'|trans }}">
+            <button type="button" class="tool-tabs__item active" role="tab" aria-selected="true" aria-controls="hg-panel-text" data-hg-mode="text">{{ 'hg.mode.text'|trans }}</button>
+            <button type="button" class="tool-tabs__item" role="tab" aria-selected="false" aria-controls="hg-panel-file" data-hg-mode="file">{{ 'hg.mode.file'|trans }}</button>
+        </div>
+
+        <form class="row g-4" data-hg-form novalidate>
+            <div class="col-lg-7">
+                <div id="hg-panel-text" role="tabpanel" data-hg-panel="text">
+                    <label class="form-label" for="hg-text">{{ 'hg.field.text'|trans }}</label>
+                    <textarea class="form-control hg-input" id="hg-text" name="text" rows="5" spellcheck="false"
+                              autocomplete="off" autocapitalize="off" aria-describedby="hg-text-hint"></textarea>
+                    <p class="form-text" id="hg-text-hint">{{ 'hg.field.text_hint'|trans }}</p>
+                </div>
+
+                <div id="hg-panel-file" role="tabpanel" data-hg-panel="file" hidden>
+                    <label class="dropzone" data-hg-dropzone>
+                        <svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true"><path d="M4 16.5V19a1 1 0 001 1h14a1 1 0 001-1v-2.5M12 15V4m0 0L7.5 8.5M12 4l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="dropzone__title">{{ 'hg.dropzone.title'|trans }}</span>
+                        <span>{{ 'hg.dropzone.hint'|trans }}</span>
+                        <input class="visually-hidden" type="file" data-hg-file>
+                    </label>
+
+                    <div class="hg-file" data-hg-file-info hidden>
+                        <p class="hg-file__name" data-hg-file-name></p>
+                        <div class="hg-file__progress" data-hg-progress-wrap hidden>
+                            <div class="progress" role="progressbar" aria-label="{{ 'hg.output.progress'|trans }}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-hg-progress>
+                                <div class="progress-bar" style="width: 0%"></div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-hg-action="cancel">{{ 'hg.action.cancel'|trans }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                {{ form.select('format', 'hg.field.format'|trans, {
+                    hex: 'hg.format.hex'|trans,
+                    upper: 'hg.format.upper'|trans,
+                    base64: 'hg.format.base64'|trans,
+                }, {id: 'hg-format', selected: 'hex'}) }}
+
+                {{ form.switch('hmac', 'hg.field.hmac'|trans, {id: 'hg-hmac', wrapper_class: 'mb-3'}) }}
+                <div class="mb-3" data-hg-key hidden>
+                    <label class="form-label visually-hidden" for="hg-key">{{ 'hg.field.key'|trans }}</label>
+                    <input class="form-control hg-input" id="hg-key" name="key" type="text" placeholder="{{ 'hg.field.key'|trans }}"
+                           autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="hg-key-hint">
+                    <p class="form-text" id="hg-key-hint">{{ 'hg.field.key_hint'|trans }}</p>
+                </div>
+
+                <label class="form-label" for="hg-expected">{{ 'hg.field.expected'|trans }}</label>
+                <textarea class="form-control hg-input hg-input--expected" id="hg-expected" name="expected" rows="3" spellcheck="false"
+                          autocomplete="off" autocapitalize="off" aria-describedby="hg-expected-hint"></textarea>
+                <p class="form-text" id="hg-expected-hint">{{ 'hg.field.expected_hint'|trans }}</p>
+            </div>
+        </form>
+
+        <hr class="my-4">
+
+        <p class="form-label">{{ 'hg.output.title'|trans }}</p>
+        <p class="hg-status" data-hg-status aria-live="polite"></p>
+        <p class="hg-compare" data-hg-compare role="status" hidden></p>
+        <ul class="hg-results" data-hg-results></ul>
+
+        <ul class="hg-notes">
+            <li>{{ 'hg.note.weak'|trans }}</li>
+            <li>{{ 'hg.note.passwords'|trans }}</li>
+            <li>{{ 'hg.note.large'|trans }}</li>
+        </ul>
+    </div>
+{% endblock %}
