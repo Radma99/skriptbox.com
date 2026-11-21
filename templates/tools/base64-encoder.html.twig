@@ -1,0 +1,177 @@
+{% extends 'layout/tool.html.twig' %}
+{% import 'macros/_form.html.twig' as form %}
+
+{% set tool_key = 'b64' %}
+{% set tool_entry = 'base64-encoder' %}
+
+{% set problems = ['whitespace', 'data_uri', 'data_uri_plain', 'padding_missing', 'padding_invalid', 'padding_position', 'invalid_chars', 'length', 'mixed', 'trailing_bits'] %}
+
+{% block tool %}
+    {% set i18n = {
+        copied: 'tool.copied'|trans,
+        input_encode: 'b64.field.input_encode'|trans,
+        input_decode: 'b64.field.input_decode'|trans,
+        empty_encode: 'b64.output.empty_encode'|trans,
+        empty_decode: 'b64.output.empty_decode'|trans,
+        empty_file: 'b64.output.empty_file'|trans,
+        truncated: 'b64.output.truncated'|trans,
+        hex_limited: 'b64.output.hex_limited'|trans,
+        binary: 'b64.binary.text'|trans,
+        binary_unknown: 'b64.binary.unknown'|trans,
+        unknown: 'b64.bytes.unknown'|trans,
+        file_name: 'b64.bytes.file_name'|trans,
+        quote: 'b64.quote'|trans,
+    } %}
+    {% for key in problems %}
+        {% set i18n = i18n|merge({('problem_' ~ key): ('b64.problem.' ~ key)|trans}) %}
+    {% endfor %}
+
+    <div data-base64-encoder data-i18n="{{ i18n|json_encode|e('html_attr') }}">
+        <div class="tool-tabs" role="tablist" aria-label="{{ 'b64.mode.label'|trans }}">
+            <button type="button" class="tool-tabs__item active" role="tab" aria-selected="true" aria-controls="b64-panel-text" data-b64-mode="encode">{{ 'b64.mode.encode'|trans }}</button>
+            <button type="button" class="tool-tabs__item" role="tab" aria-selected="false" aria-controls="b64-panel-text" data-b64-mode="decode">{{ 'b64.mode.decode'|trans }}</button>
+            <button type="button" class="tool-tabs__item" role="tab" aria-selected="false" aria-controls="b64-panel-file" data-b64-mode="file">{{ 'b64.mode.file'|trans }}</button>
+            <button type="button" class="tool-tabs__item" role="tab" aria-selected="false" aria-controls="b64-panel-bytes" data-b64-mode="bytes">{{ 'b64.mode.bytes'|trans }}</button>
+        </div>
+
+        {# Text kodieren und dekodieren #}
+        <div id="b64-panel-text" role="tabpanel" data-b64-panel="text">
+            <form class="row g-4" data-b64-form novalidate>
+                <div class="col-lg-7">
+                    <label class="form-label" for="b64-input" data-b64-input-label>{{ 'b64.field.input_encode'|trans }}</label>
+                    <textarea class="form-control b64-input" id="b64-input" name="input" rows="4" spellcheck="false"
+                              autocomplete="off" autocapitalize="off"></textarea>
+                </div>
+
+                <div class="col-lg-5">
+                    <div data-b64-options="encode">
+                        {{ form.select('variant', 'b64.field.variant'|trans, {
+                            standard: 'b64.variant.standard'|trans,
+                            url: 'b64.variant.url'|trans,
+                        }, {id: 'b64-variant', selected: 'standard'}) }}
+                        <div data-b64-padding hidden>
+                            {{ form.switch('padding', 'b64.field.padding'|trans, {id: 'b64-padding', wrapper_class: 'mb-2'}) }}
+                        </div>
+                        {{ form.switch('wrap', 'b64.field.wrap'|trans, {id: 'b64-wrap', wrapper_class: 'mb-2'}) }}
+                    </div>
+
+                    <p class="form-text mt-0" data-b64-options="decode" hidden>{{ 'b64.field.decode_hint'|trans }}</p>
+                </div>
+            </form>
+
+            <hr class="my-4">
+
+            <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                <p class="form-label mb-0">{{ 'b64.output.title'|trans }}</p>
+                <button type="button" class="btn btn-primary" data-b64-action="copy">{{ 'tool.copy'|trans }}</button>
+            </div>
+
+            <ul class="b64-problems" data-b64-problems hidden aria-live="polite"></ul>
+            <ul class="b64-notes" data-b64-notes hidden aria-live="polite"></ul>
+
+            <div class="b64-binary" data-b64-binary hidden>
+                <p class="mb-2" data-b64-binary-text></p>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-b64-action="download-decoded">{{ 'b64.binary.download'|trans }}</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" data-b64-action="open-bytes">{{ 'b64.binary.open'|trans }}</button>
+                </div>
+            </div>
+
+            <pre class="b64-output" data-b64-output tabindex="0" aria-live="polite"></pre>
+            <p class="form-text mt-n3 mb-4" data-b64-output-hint hidden></p>
+
+            <div data-b64-code-section hidden>
+                <p class="form-label">{{ 'b64.output.code'|trans }}</p>
+                <dl class="b64-code" data-b64-code></dl>
+            </div>
+        </div>
+
+        {# Datei → Base64 / Data-URI #}
+        <div id="b64-panel-file" role="tabpanel" data-b64-panel="file" hidden>
+            <label class="dropzone" data-b64-dropzone>
+                <svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true"><path d="M4 16.5V19a1 1 0 001 1h14a1 1 0 001-1v-2.5M12 15V4m0 0L7.5 8.5M12 4l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="dropzone__title">{{ 'b64.dropzone.title'|trans }}</span>
+                <span>{{ 'b64.dropzone.hint'|trans }}</span>
+                <input class="visually-hidden" type="file" data-b64-file>
+            </label>
+
+            <div class="b64-file mt-4" data-b64-file-result hidden>
+                <div class="b64-summary">
+                    <figure class="b64-preview" data-b64-file-preview hidden>
+                        <img alt="{{ 'b64.output.preview'|trans }}">
+                    </figure>
+                    <dl class="b64-facts" aria-live="polite">
+                        <div><dt>{{ 'b64.file.name'|trans }}</dt><dd data-b64-fact="name"></dd></div>
+                        <div><dt>{{ 'b64.file.type'|trans }}</dt><dd data-b64-fact="type"></dd></div>
+                        <div><dt>{{ 'b64.file.size_before'|trans }}</dt><dd data-b64-fact="before"></dd></div>
+                        <div><dt>{{ 'b64.file.size_after'|trans }}</dt><dd data-b64-fact="after"></dd></div>
+                    </dl>
+                </div>
+
+                <form class="row g-3 align-items-end mt-1" data-b64-file-form novalidate>
+                    {{ form.select('format', 'b64.field.format'|trans, {
+                        base64: 'b64.format.base64'|trans,
+                        datauri: 'b64.format.datauri'|trans,
+                        css: 'b64.format.css'|trans,
+                        img: 'b64.format.img'|trans,
+                    }, {id: 'b64-format', selected: 'datauri', wrapper_class: 'col-sm-6'}) }}
+                    <div class="col-sm-6 pb-2" data-b64-file-wrap hidden>
+                        {{ form.switch('wrap', 'b64.field.wrap'|trans, {id: 'b64-file-wrap', wrapper_class: ''}) }}
+                    </div>
+                </form>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                <p class="form-label mb-0">{{ 'b64.output.title'|trans }}</p>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-primary" data-b64-action="download-text">{{ 'b64.output.download_text'|trans }}</button>
+                    <button type="button" class="btn btn-primary" data-b64-action="copy-file">{{ 'tool.copy'|trans }}</button>
+                </div>
+            </div>
+
+            <pre class="b64-output" data-b64-file-output tabindex="0"></pre>
+            <p class="form-text mt-n3" data-b64-file-hint hidden></p>
+        </div>
+
+        {# Base64 / Data-URI → Datei #}
+        <div id="b64-panel-bytes" role="tabpanel" data-b64-panel="bytes" hidden>
+            <form class="row g-4" data-b64-bytes-form novalidate>
+                <div class="col-lg-7">
+                    <label class="form-label" for="b64-bytes-input">{{ 'b64.field.input_bytes'|trans }}</label>
+                    <textarea class="form-control b64-input" id="b64-bytes-input" name="input" rows="4" spellcheck="false"
+                              autocomplete="off" autocapitalize="off"></textarea>
+                    <p class="form-text">{{ 'b64.field.decode_hint'|trans }}</p>
+                </div>
+
+                <div class="col-lg-5">
+                    {{ form.input('filename', 'b64.field.filename'|trans, {id: 'b64-filename', autocomplete: 'off'}) }}
+                    <button type="button" class="btn btn-primary" data-b64-action="download-bytes" disabled>{{ 'b64.bytes.download'|trans }}</button>
+                </div>
+            </form>
+
+            <hr class="my-4">
+
+            <ul class="b64-problems" data-b64-bytes-problems hidden aria-live="polite"></ul>
+            <ul class="b64-notes" data-b64-bytes-notes hidden aria-live="polite"></ul>
+            <p class="b64-empty" data-b64-bytes-empty>{{ 'b64.output.empty_bytes'|trans }}</p>
+
+            <div data-b64-bytes-result hidden>
+                <div class="b64-summary">
+                    <figure class="b64-preview" data-b64-bytes-preview hidden>
+                        <img alt="{{ 'b64.output.preview'|trans }}">
+                    </figure>
+                    <dl class="b64-facts" aria-live="polite">
+                        <div><dt>{{ 'b64.bytes.type'|trans }}</dt><dd data-b64-bytes-fact="type"></dd></div>
+                        <div><dt>{{ 'b64.bytes.size'|trans }}</dt><dd data-b64-bytes-fact="size"></dd></div>
+                    </dl>
+                </div>
+
+                <p class="form-label mt-4">{{ 'b64.output.hex'|trans }}</p>
+                <pre class="b64-output b64-output--hex" data-b64-hex tabindex="0"></pre>
+                <p class="form-text mt-n3" data-b64-hex-hint hidden></p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

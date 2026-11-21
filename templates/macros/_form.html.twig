@@ -1,0 +1,49 @@
+{#
+    Formularfelder im Bootstrap-Stil.
+    Aufruf: {% import 'macros/_form.html.twig' as form %} {{ form.input('ssid', 'Netzwerkname', {required: true}) }}
+#}
+
+{% macro input(name, label, options = {}) %}
+    {% set id = options.id|default('field-' ~ name) %}
+    <div class="{{ options.wrapper_class|default('mb-3') }}">
+        <label class="form-label" for="{{ id }}">{{ label }}{% if options.required|default(false) %} <span class="text-danger" aria-hidden="true">*</span>{% endif %}</label>
+        <input class="form-control" id="{{ id }}" name="{{ name }}" type="{{ options.type|default('text') }}"
+               {% if options.placeholder is defined %}placeholder="{{ options.placeholder }}"{% endif %}
+               {% if options.autocomplete is defined %}autocomplete="{{ options.autocomplete }}"{% endif %}
+               {% if options.inputmode is defined %}inputmode="{{ options.inputmode }}"{% endif %}
+               {% if options.value is defined %}value="{{ options.value }}"{% endif %}
+               {{ options.required|default(false) ? 'required' }}>
+    </div>
+{% endmacro %}
+
+{% macro textarea(name, label, options = {}) %}
+    {% set id = options.id|default('field-' ~ name) %}
+    <div class="{{ options.wrapper_class|default('mb-3') }}">
+        <label class="form-label" for="{{ id }}">{{ label }}</label>
+        <textarea class="form-control" id="{{ id }}" name="{{ name }}" rows="{{ options.rows|default(4) }}"
+                  {% if options.placeholder is defined %}placeholder="{{ options.placeholder }}"{% endif %}></textarea>
+    </div>
+{% endmacro %}
+
+{% macro select(name, label, choices, options = {}) %}
+    {% set id = options.id|default('field-' ~ name) %}
+    <div class="{{ options.wrapper_class|default('mb-3') }}">
+        <label class="form-label" for="{{ id }}">{{ label }}</label>
+        <select class="form-select" id="{{ id }}" name="{{ name }}">
+            {% for value, choice in choices %}
+                <option value="{{ value }}"{{ value == options.selected|default('') ? ' selected' }}>{{ choice }}</option>
+            {% endfor %}
+        </select>
+    </div>
+{% endmacro %}
+
+{% macro switch(name, label, options = {}) %}
+    {% set id = options.id|default('field-' ~ name) %}
+    {# Eigener Wrapper, damit Rasterklassen (col-*) nicht mit dem Einzug von form-check kollidieren #}
+    <div class="{{ options.wrapper_class|default('mb-3') }}">
+        <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" role="switch" id="{{ id }}" name="{{ name }}" value="1"{{ options.checked|default(false) ? ' checked' }}>
+            <label class="form-check-label" for="{{ id }}">{{ label }}</label>
+        </div>
+    </div>
+{% endmacro %}
