@@ -1,0 +1,38 @@
+.li-output {
+    max-height: 32rem;
+    margin: 0;
+    padding: 1.25rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    background: var(--bs-tertiary-bg);
+    overflow-y: auto;
+    font-size: 1rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+
+    &.is-code {
+        font-family: var(--bs-font-monospace);
+        font-size: .875rem;
+    }
+}
+
+.li-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    margin-bottom: .75rem;
+
+    &__stats {
+        margin: 0;
+        color: var(--sb-muted);
+        font-size: .875rem;
+    }
+
+    &__actions {
+        display: flex;
+        gap: .5rem;
+    }
+}

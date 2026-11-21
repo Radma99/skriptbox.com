@@ -1,0 +1,41 @@
+{% extends 'layout/tool.html.twig' %}
+{% import 'macros/_form.html.twig' as form %}
+
+{% set tool_key = 'li' %}
+{% set tool_entry = 'lorem-ipsum' %}
+
+{% block tool %}
+    <div data-lorem-ipsum data-i18n="{{ {
+        copied: 'tool.copied'|trans,
+        stats: 'li.stats'|trans,
+        statsSingle: 'li.stats_single'|trans,
+    }|json_encode|e('html_attr') }}">
+        <form class="row g-3 align-items-end mb-4" data-li-form novalidate>
+            {{ form.input('count', 'li.field.count'|trans, {id: 'li-count', type: 'number', inputmode: 'numeric', value: 3, wrapper_class: 'col-6 col-md-3'}) }}
+
+            {{ form.select('unit', 'li.field.unit'|trans, {
+                paragraphs: 'li.unit.paragraphs'|trans,
+                sentences: 'li.unit.sentences'|trans,
+                words: 'li.unit.words'|trans,
+                characters: 'li.unit.characters'|trans,
+            }, {id: 'li-unit', selected: 'paragraphs', wrapper_class: 'col-6 col-md-3'}) }}
+
+            {{ form.select('format', 'li.field.format'|trans, {
+                text: 'li.format.text'|trans,
+                html: 'li.format.html'|trans,
+            }, {id: 'li-format', selected: 'text', wrapper_class: 'col-6 col-md-3'}) }}
+
+            {{ form.switch('classicStart', 'li.field.classic_start'|trans, {id: 'li-classic', checked: true, wrapper_class: 'col-6 col-md-3 pb-2'}) }}
+        </form>
+
+        <div class="li-toolbar">
+            <p class="li-toolbar__stats" data-li-stats aria-live="polite"></p>
+            <div class="li-toolbar__actions">
+                <button type="button" class="btn btn-outline-secondary" data-li-action="generate">{{ 'li.action.generate'|trans }}</button>
+                <button type="button" class="btn btn-primary" data-li-action="copy">{{ 'tool.copy'|trans }}</button>
+            </div>
+        </div>
+
+        <div class="li-output" data-li-output aria-label="{{ 'li.result'|trans }}" tabindex="0"></div>
+    </div>
+{% endblock %}
